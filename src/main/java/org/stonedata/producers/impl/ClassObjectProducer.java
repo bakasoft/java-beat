@@ -1,7 +1,7 @@
 package org.stonedata.producers.impl;
 
 import org.stonedata.producers.ObjectProducer;
-import org.stonedata.reflect.ReflectUtils;
+import org.stonedata.util.ReflectUtils;
 import org.stonedata.errors.StoneException;
 
 import java.lang.reflect.Constructor;

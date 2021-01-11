@@ -1,6 +1,6 @@
 package org.stonedata.producers.impl;
 
-import org.stonedata.common.GenericObject;
+import org.stonedata.util.GenericObject;
 import org.stonedata.errors.StoneException;
 import org.stonedata.producers.ObjectProducer;
 

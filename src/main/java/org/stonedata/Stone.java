@@ -7,7 +7,8 @@ import org.stonedata.io.impl.PrettyPrintOutput;
 import org.stonedata.io.impl.ReadableInput;
 import org.stonedata.io.impl.SequenceInput;
 import org.stonedata.io.impl.StoneAppendableOutput;
-import org.stonedata.text.StoneTextEncoder;
+import org.stonedata.coding.text.StoneTextEncoder;
+import org.stonedata.schema.StoneSchema;
 
 import java.util.regex.Pattern;
 

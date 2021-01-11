@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 
-import org.stonedata.binary.translate.INT32;
+import org.stonedata.coding.binary.translate.INT32;
 import util.TestUtils;
 
 import java.io.ByteArrayInputStream;

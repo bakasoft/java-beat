@@ -2,14 +2,14 @@ package org.stonedata;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.stonedata.binary.input.CreatorRepository;
-import org.stonedata.binary.input.ValueType;
-import org.stonedata.binary.input.impl.Creators;
-import org.stonedata.binary.input.impl.DefaultCreatorRepository;
-import org.stonedata.binary.output.DescriberRepository;
-import org.stonedata.binary.output.impl.DefaultDescriberRepository;
-import org.stonedata.binary.output.impl.Describers;
-import org.stonedata.binary.output.impl.HashReferenceStrategy;
+import org.stonedata.coding.binary.input.CreatorRepository;
+import org.stonedata.coding.binary.input.ValueType;
+import org.stonedata.coding.binary.input.impl.Creators;
+import org.stonedata.coding.binary.input.impl.DefaultCreatorRepository;
+import org.stonedata.coding.binary.output.DescriberRepository;
+import org.stonedata.coding.binary.output.impl.DefaultDescriberRepository;
+import org.stonedata.coding.binary.output.impl.Describers;
+import org.stonedata.coding.binary.output.impl.HashReferenceStrategy;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

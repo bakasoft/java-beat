@@ -1,6 +1,6 @@
 package org.stonedata.producers.impl;
 
-import org.stonedata.common.GenericValue;
+import org.stonedata.util.GenericValue;
 import org.stonedata.producers.ValueProducer;
 
 import java.util.List;
