@@ -93,7 +93,7 @@ public class StoneTextDecoder implements StoneCharDecoder {
 
     private Object readObject(StoneCharInput input, String type) throws IOException {
         var maker = makers.findObjectMaker(type);
-        var obj = maker.newInstance(type);
+        var obj = maker.beginInstance(type);
 
         input.expect('{');
 
@@ -122,12 +122,12 @@ public class StoneTextDecoder implements StoneCharDecoder {
 
         input.expect('}');
 
-        return obj;
+        return maker.endInstance(obj);
     }
 
     private Object readArray(StoneCharInput input, String type) throws IOException {
         var maker = makers.findArrayMaker(type);
-        var arr = maker.newInstance(type);
+        var arr = maker.beginInstance(type);
 
         input.expect('[');
 
@@ -148,7 +148,7 @@ public class StoneTextDecoder implements StoneCharDecoder {
 
         input.expect(']');
 
-        return arr;
+        return maker.endInstance(arr);
     }
 
     private Object readValue(StoneCharInput input, String type) throws IOException {

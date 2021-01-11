@@ -1,9 +1,11 @@
 package org.stonedata.producers;
 
 public interface ObjectProducer {
-    Object newInstance(String type);
+    Object beginInstance(String type);
 
-    void set(Object obj, String key, Object value);
+    void set(Object instance, String key, Object value);
 
-    // build()
+    // TODO add get type of a field so it can be defaulted to type-less values
+
+    Object endInstance(Object instance);
 }

@@ -1,6 +1,10 @@
-package org.stonedata.producers;
+package org.stonedata.producers.impl;
 
 import org.stonedata.errors.StoneException;
+import org.stonedata.producers.ArrayProducer;
+import org.stonedata.producers.ObjectProducer;
+import org.stonedata.producers.ProducerRepository;
+import org.stonedata.producers.ValueProducer;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

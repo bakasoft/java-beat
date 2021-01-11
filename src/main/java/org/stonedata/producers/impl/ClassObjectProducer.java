@@ -1,5 +1,6 @@
-package org.stonedata.producers;
+package org.stonedata.producers.impl;
 
+import org.stonedata.producers.ObjectProducer;
 import org.stonedata.reflect.ReflectUtils;
 import org.stonedata.errors.StoneException;
 
@@ -86,7 +87,7 @@ public class ClassObjectProducer implements ObjectProducer {
     }
 
     @Override
-    public Object newInstance(String typeName) {
+    public Object beginInstance(String typeName) {
         return maker.get();
     }
 
@@ -99,5 +100,10 @@ public class ClassObjectProducer implements ObjectProducer {
         }
 
         setter.accept(obj, value);
+    }
+
+    @Override
+    public Object endInstance(Object instance) {
+        return type.cast(instance);
     }
 }

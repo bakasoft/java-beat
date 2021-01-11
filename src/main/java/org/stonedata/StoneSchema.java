@@ -7,7 +7,7 @@ import org.stonedata.examiners.impl.GenericMapExaminer;
 import org.stonedata.examiners.impl.GenericObjectExaminer;
 import org.stonedata.examiners.impl.StandardExaminerRepository;
 import org.stonedata.producers.ProducerRepository;
-import org.stonedata.producers.StandardProducerRepository;
+import org.stonedata.producers.impl.StandardProducerRepository;
 import org.stonedata.text.StoneTextDecoder;
 import org.stonedata.text.StoneTextEncoder;
 

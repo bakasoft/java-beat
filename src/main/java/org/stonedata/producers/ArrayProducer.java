@@ -1,9 +1,9 @@
 package org.stonedata.producers;
 
 public interface ArrayProducer {
-    Object newInstance(String type);
+    Object beginInstance(String type);
 
-    void add(Object obj, Object item);
+    void add(Object instance, Object item);
 
-    // build()
+    Object endInstance(Object instance);
 }

@@ -1,12 +1,13 @@
-package org.stonedata.producers;
+package org.stonedata.producers.impl;
 
 import org.stonedata.common.GenericObject;
 import org.stonedata.errors.StoneException;
+import org.stonedata.producers.ObjectProducer;
 
 public class GenericObjectProducer implements ObjectProducer {
 
     @Override
-    public Object newInstance(String type) {
+    public Object beginInstance(String type) {
         return new GenericObject(type);
     }
 
@@ -18,5 +19,10 @@ public class GenericObjectProducer implements ObjectProducer {
         else {
             throw new StoneException();
         }
+    }
+
+    @Override
+    public Object endInstance(Object instance) {
+        return instance;
     }
 }
