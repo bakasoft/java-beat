@@ -1,10 +1,7 @@
 package org.stonedata.producers.impl;
 
-import org.stonedata.errors.ProducerNotFoundException;
-import org.stonedata.errors.StoneException;
 import org.stonedata.producers.ArrayProducer;
 import org.stonedata.producers.ObjectProducer;
-import org.stonedata.producers.ProducerRepository;
 import org.stonedata.producers.ValueProducer;
 
 import java.lang.reflect.ParameterizedType;
@@ -12,19 +9,20 @@ import java.lang.reflect.Type;
 import java.time.Duration;
 import java.util.List;
 
-public class EmptyProducerRepository implements ProducerRepository {
-    @Override
-    public ObjectProducer findObjectProducer(String type, Type typeHint) {
+public class DefaultProducers {
+    private DefaultProducers() {}
+
+    public static ObjectProducer tryCreateObjectProducer(Type typeHint) {
         if (typeHint instanceof Class) {
-            var typeClass = (Class<?>)typeHint;
+            var typeClass = (Class<?>) typeHint;
 
             return new ClassObjectProducer(typeClass);
         }
-        throw new ProducerNotFoundException("object", type, typeHint);
+
+        return null;
     }
 
-    @Override
-    public ArrayProducer findArrayProducer(String type, Type typeHint) {
+    public static ArrayProducer tryCreateArrayProducer(Type typeHint) {
         if (typeHint instanceof ParameterizedType) {
             var pType = (ParameterizedType)typeHint;
             var pArgs = pType.getActualTypeArguments();
@@ -39,17 +37,17 @@ public class EmptyProducerRepository implements ProducerRepository {
                 }
             }
         }
-        throw new ProducerNotFoundException("array", type, typeHint);
+
+        return null;
     }
 
-    @Override
-    public ValueProducer findValueProducer(String type, Type typeHint) {
+    public static ValueProducer tryCreateValueProducer(Type typeHint) {
         if (typeHint == Integer.class) {
             return new IntegerProducer();
         }
         else if (typeHint == Duration.class) {
             return new DurationProducer();
         }
-        throw new ProducerNotFoundException("value", type, typeHint);
+        return null;
     }
 }

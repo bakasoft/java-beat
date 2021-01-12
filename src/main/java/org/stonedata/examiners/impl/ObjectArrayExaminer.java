@@ -4,11 +4,11 @@ import org.stonedata.examiners.ArrayExaminer;
 
 import java.lang.reflect.Array;
 
-public class GenericArrayExaminer implements ArrayExaminer {
+public class ObjectArrayExaminer implements ArrayExaminer {
 
-    public static final GenericArrayExaminer INSTANCE = new GenericArrayExaminer();
+    public static final ObjectArrayExaminer INSTANCE = new ObjectArrayExaminer();
 
-    private GenericArrayExaminer() {}
+    private ObjectArrayExaminer() {}
 
     @Override
     public int getSizeOf(Object value) {

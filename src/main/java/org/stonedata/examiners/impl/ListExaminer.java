@@ -4,13 +4,13 @@ import org.stonedata.examiners.ArrayExaminer;
 
 import java.util.List;
 
-public class GenericListExaminer implements ArrayExaminer {
+public class ListExaminer implements ArrayExaminer {
 
-    public static final GenericListExaminer ANONYMOUS_INSTANCE = new GenericListExaminer(null);
+    public static final ListExaminer ANONYMOUS_INSTANCE = new ListExaminer(null);
 
     private final String type;
 
-    public GenericListExaminer(String type) {
+    public ListExaminer(String type) {
         this.type = type;
     }
 

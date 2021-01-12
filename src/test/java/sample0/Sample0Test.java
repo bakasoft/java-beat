@@ -15,10 +15,10 @@ class Sample0Test {
     void testSample0() throws IOException {
         var stone = new Stone();
         var text = TestUtils.loadString("/sample0.st");
-        var release = stone.read(text, Release.class);
+        var release = stone.readText(text, Release.class);
         var buffer = new StringBuilder();
 
-        stone.write(release, buffer, true);
+        stone.writeText(release, buffer, true);
 
         assertEquals(text, buffer.toString());
     }

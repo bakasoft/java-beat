@@ -5,6 +5,10 @@ import org.stonedata.util.StringUtils;
 import java.lang.reflect.Type;
 
 public class ProducerNotFoundException extends StoneException {
+    public ProducerNotFoundException(String message) {
+        super(message);
+    }
+
     public ProducerNotFoundException(String target, String type, Type typeHint) {
         super(generateMessage(target, type, typeHint));
     }

@@ -8,6 +8,10 @@ import java.lang.reflect.Type;
 
 public class GenericObjectProducer implements ObjectProducer {
 
+    public static final GenericObjectProducer INSTANCE = new GenericObjectProducer();
+
+    private GenericObjectProducer() {}
+
     @Override
     public Object beginInstance(String type) {
         return new GenericObject(type);

@@ -7,13 +7,13 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class GenericMapExaminer implements ObjectExaminer {
+public class MapExaminer implements ObjectExaminer {
 
-    public static final GenericMapExaminer ANONYMOUS_INSTANCE = new GenericMapExaminer(null);
+    public static final MapExaminer ANONYMOUS_INSTANCE = new MapExaminer(null);
 
     private final String type;
 
-    public GenericMapExaminer(String type) {
+    public MapExaminer(String type) {
         this.type = type;
     }
 

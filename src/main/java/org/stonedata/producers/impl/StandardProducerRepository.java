@@ -1,5 +1,7 @@
 package org.stonedata.producers.impl;
 
+import org.stonedata.Stone;
+import org.stonedata.errors.ProducerNotFoundException;
 import org.stonedata.errors.StoneException;
 import org.stonedata.producers.ArrayProducer;
 import org.stonedata.producers.ObjectProducer;
@@ -7,108 +9,112 @@ import org.stonedata.producers.ProducerRepository;
 import org.stonedata.producers.ValueProducer;
 
 import java.lang.reflect.Type;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 public class StandardProducerRepository implements ProducerRepository {
 
-    private final Map<String, Object> makers;
+    private final Stone stone;
 
-    private ObjectProducer genericObjectProducer;
-    private ArrayProducer genericArrayProducer;
-    private ValueProducer genericValueProducer;
-
-    public StandardProducerRepository() {
-        this.makers = new LinkedHashMap<>();
-        this.genericObjectProducer = new GenericObjectProducer();
-        this.genericArrayProducer = new GenericListProducer();
-        this.genericValueProducer = new GenericValueProducer();
+    public StandardProducerRepository(Stone stone) {
+        this.stone = stone;
     }
 
-    public void addObjectMakerFor(Class<?> type) {
-        addObjectMakerFor(type, type.getSimpleName());
-    }
+    @Override
+    public ObjectProducer findObjectProducer(String name, Type typeHint) {
+        var producer = stone.getProducer(name);
 
-    public void addObjectMakerFor(Class<?> type, String name) {
-        makers.put(name, new ClassObjectProducer(type));
-    }
-
-    private void addMakerG(String type, Object maker) {
-        if (makers.containsKey(type)) {
-            throw new RuntimeException();
-        }
-        makers.put(type, maker);
-    }
-
-    private <T> T findMakerG(Class<T> typeClass, String typeName, T defaultValue, Type typeHint) {
-        var maker = makers.get(typeName);
-
-        // TODO consider typeHint
-
-        if (maker != null) {
-            if (typeClass.isInstance(maker)) {
-                return typeClass.cast(maker);
+        if (producer != null) {
+            if (producer instanceof ObjectProducer) {
+                return (ObjectProducer) producer;
             }
             else {
-                throw new StoneException();
+                throw new ProducerNotFoundException(String.format(
+                        "Producer %s is not an object producer.", name));
             }
         }
-        else if (defaultValue == null) {
-            throw new StoneException("No maker for " + typeName);
+
+        Type type = stone.getType(name);
+
+        if (type == null) {
+            type = typeHint;
         }
-        else {
-            return defaultValue;
+
+        var defaultProducer = DefaultProducers.tryCreateObjectProducer(type);
+
+        if (defaultProducer != null) {
+            if (name != null) {
+                stone.putProducer(name, defaultProducer);
+            }
+
+            return defaultProducer;
         }
-    }
 
-    public void addMaker(String type, ObjectProducer maker) {
-        addMakerG(type, maker);
-    }
-
-    public void addMaker(String type, ArrayProducer maker) {
-        addMakerG(type, maker);
-    }
-
-    public void addMaker(String type, ValueProducer maker) {
-        addMakerG(type, maker);
+        return GenericObjectProducer.INSTANCE;
     }
 
     @Override
-    public ObjectProducer findObjectProducer(String type, Type typeHint) {
-        return findMakerG(ObjectProducer.class, type, genericObjectProducer, typeHint);
+    public ArrayProducer findArrayProducer(String name, Type typeHint) {
+        var producer = stone.getProducer(name);
+
+        if (producer != null) {
+            if (producer instanceof ArrayProducer) {
+                return (ArrayProducer) producer;
+            }
+            else {
+                throw new ProducerNotFoundException(String.format(
+                        "Producer %s is not an array producer.", name));
+            }
+        }
+
+        Type type = stone.getType(name);
+
+        if (type == null) {
+            type = typeHint;
+        }
+
+        var defaultProducer = DefaultProducers.tryCreateArrayProducer(type);
+
+        if (defaultProducer != null) {
+            if (name != null) {
+                stone.putProducer(name, defaultProducer);
+            }
+
+            return defaultProducer;
+        }
+
+        return GenericListProducer.INSTANCE;
     }
 
     @Override
-    public ArrayProducer findArrayProducer(String type, Type typeHint) {
-        return findMakerG(ArrayProducer.class, type, genericArrayProducer, typeHint);
+    public ValueProducer findValueProducer(String name, Type typeHint) {
+        var producer = stone.getProducer(name);
+
+        if (producer != null) {
+            if (producer instanceof ValueProducer) {
+                return (ValueProducer) producer;
+            }
+            else {
+                throw new ProducerNotFoundException(String.format(
+                        "Producer %s is not a value producer.", name));
+            }
+        }
+
+        Type type = stone.getType(name);
+
+        if (type == null) {
+            type = typeHint;
+        }
+
+        var defaultProducer = DefaultProducers.tryCreateValueProducer(type);
+
+        if (defaultProducer != null) {
+            if (name != null) {
+                stone.putProducer(name, defaultProducer);
+            }
+
+            return defaultProducer;
+        }
+
+        return GenericValueProducer.INSTANCE;
     }
 
-    @Override
-    public ValueProducer findValueProducer(String type, Type typeHint) {
-        return findMakerG(ValueProducer.class, type, genericValueProducer, typeHint);
-    }
-
-    public ObjectProducer getGenericObjectMaker() {
-        return genericObjectProducer;
-    }
-
-    public void setGenericObjectMaker(ObjectProducer genericObjectProducer) {
-        this.genericObjectProducer = genericObjectProducer;
-    }
-
-    public ArrayProducer getGenericArrayMaker() {
-        return genericArrayProducer;
-    }
-
-    public void setGenericArrayMaker(ArrayProducer genericArrayProducer) {
-        this.genericArrayProducer = genericArrayProducer;
-    }
-
-    public ValueProducer getGenericValueMaker() {
-        return genericValueProducer;
-    }
-
-    public void setGenericValueMaker(ValueProducer genericValueProducer) {
-        this.genericValueProducer = genericValueProducer;
-    }
 }

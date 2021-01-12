@@ -1,46 +1,42 @@
 package org.stonedata.examiners.impl;
 
+import org.stonedata.Stone;
 import org.stonedata.examiners.Examiner;
 import org.stonedata.errors.StoneException;
 import org.stonedata.examiners.ExaminerRepository;
-import org.stonedata.examiners.*;
 
-import java.util.LinkedHashMap;
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 
 public class StandardExaminerRepository implements ExaminerRepository {
 
-    private final Map<Class<?>, Examiner> examiners;
+    private final Stone stone;
 
-    public StandardExaminerRepository() {
-        this.examiners = new LinkedHashMap<>();
-    }
-
-    public void addExaminer(Class<?> type, Examiner examiner) {
-        if (examiners.containsKey(type)) {
-            throw new StoneException();
-        }
-        examiners.put(type, examiner);
+    public StandardExaminerRepository(Stone stone) {
+        this.stone = stone;
     }
 
     @Override
     public Examiner findExaminer(Class<?> type) {
-        var examiner = examiners.get(type);
+        var examiner = stone.getExaminer(type);
 
         if (examiner != null) {
             return examiner;  // Best scenario
         }
         else if (type.isArray()) {
-            return GenericArrayExaminer.INSTANCE;  // Any array
+            return ObjectArrayExaminer.INSTANCE;  // Any array
         }
         else if (List.class.isAssignableFrom(type)) {
-            return GenericListExaminer.ANONYMOUS_INSTANCE;  // Any List
+            return ListExaminer.ANONYMOUS_INSTANCE;  // Any List
         }
         else if (Map.class.isAssignableFrom(type)) {
-            return GenericMapExaminer.ANONYMOUS_INSTANCE;  // Any List
+            return MapExaminer.ANONYMOUS_INSTANCE;  // Any List
+        }
+        else if (type == Duration.class) {
+            return new DurationExaminer(null);
         }
 
-        throw new StoneException("Examiner not found: " + type);
+        return new ClassObjectExaminer(type, null);
     }
 }

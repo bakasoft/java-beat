@@ -8,6 +8,10 @@ import java.lang.reflect.Type;
 
 public class GenericListProducer implements ArrayProducer {
 
+    public static final GenericListProducer INSTANCE = new GenericListProducer();
+
+    private GenericListProducer() {}
+
     @Override
     public Object beginInstance(String type) {
         return new GenericList(type);

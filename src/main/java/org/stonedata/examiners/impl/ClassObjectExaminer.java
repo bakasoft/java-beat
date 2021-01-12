@@ -10,12 +10,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
-public class GenericObjectExaminer implements ObjectExaminer {
+public class ClassObjectExaminer implements ObjectExaminer {
 
     private final Map<String, Function<Object, Object>> attributes;
     private final String name;
 
-    public GenericObjectExaminer(Class<?> type, String name) {
+    public ClassObjectExaminer(Class<?> type, String name) {
         this.attributes = generateAttributes(type);
         this.name = name;
     }
