@@ -1,11 +1,14 @@
 package org.stonedata.producers.impl;
 
+import org.stonedata.errors.ConversionException;
 import org.stonedata.producers.ObjectProducer;
 import org.stonedata.util.ReflectUtils;
 import org.stonedata.errors.StoneException;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Type;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
@@ -16,10 +19,12 @@ public class ClassObjectProducer implements ObjectProducer {
     private final Class<?> type;
     private final Supplier<Object> maker;
     private final Map<String, BiConsumer<Object, Object>> setters;
+    private final Map<String, Type> typeHints;
 
     public ClassObjectProducer(Class<?> type) {
         this.type = type;
-        this.setters = generateSetters(type);
+        this.typeHints = new HashMap<>();
+        this.setters = generateSetters(type, typeHints);
         this.maker = generateMaker(type);
     }
 
@@ -49,13 +54,15 @@ public class ClassObjectProducer implements ObjectProducer {
         };
     }
 
-    private static Map<String, BiConsumer<Object, Object>> generateSetters(Class<?> type) {
+    private static Map<String, BiConsumer<Object, Object>> generateSetters(Class<?> type, Map<String, Type> typeHints) {
         var setters = new LinkedHashMap<String, BiConsumer<Object, Object>>();
 
         for (var field : type.getFields()) {
             var name = field.getName();
             var dataType = field.getType();
+            var dataTypeHint = field.getGenericType();
 
+            typeHints.put(name, dataTypeHint);
             setters.put(name, (obj, value) -> {
                 try {
                     field.set(obj, ReflectUtils.convertTo(value, dataType));
@@ -71,6 +78,8 @@ public class ClassObjectProducer implements ObjectProducer {
             if (name.startsWith("set") && method.getParameterCount() == 1) {
                 name = name.substring(3, 4).toLowerCase() + name.substring(4);
                 var dataType = method.getParameters()[0].getType();
+                var dataTypeHint = method.getParameters()[0].getParameterizedType();  // TODO check if this is OK
+                typeHints.put(name, dataTypeHint);
                 setters.put(name, (obj, value) -> {
                     try {
                         method.invoke(obj, ReflectUtils.convertTo(value, dataType));
@@ -99,7 +108,17 @@ public class ClassObjectProducer implements ObjectProducer {
             throw new StoneException("not setter for " + key);
         }
 
-        setter.accept(obj, value);
+        try {
+            setter.accept(obj, value);
+        }
+        catch (ConversionException e) {
+            throw new StoneException(obj.getClass().getSimpleName() + "[" + key + "]: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public Type getTypeHint(String key) {
+        return typeHints.get(key);
     }
 
     @Override

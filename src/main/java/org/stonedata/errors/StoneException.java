@@ -10,6 +10,10 @@ public class StoneException extends RuntimeException {
         super(message);
     }
 
+    public StoneException(String message, Exception cause) {
+        super(message, cause);
+    }
+
     public StoneException(Throwable cause) {
         super(cause);
         // TODO add message

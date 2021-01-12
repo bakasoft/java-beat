@@ -1,9 +1,11 @@
 package org.stonedata.producers;
 
+import java.lang.reflect.Type;
+
 public interface ProducerRepository {
-    ObjectProducer findObjectMaker(String type);
+    ObjectProducer findObjectProducer(String type, Type typeHint);
 
-    ArrayProducer findArrayMaker(String type);
+    ArrayProducer findArrayProducer(String type, Type typeHint);
 
-    ValueProducer findValueMaker(String type);
+    ValueProducer findValueProducer(String type, Type typeHint);
 }

@@ -1,11 +1,13 @@
 package org.stonedata.producers;
 
+import java.lang.reflect.Type;
+
 public interface ObjectProducer {
     Object beginInstance(String type);
 
     void set(Object instance, String key, Object value);
 
-    // TODO add get type of a field so it can be defaulted to type-less values
+    Type getTypeHint(String key);
 
     Object endInstance(Object instance);
 }

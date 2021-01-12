@@ -1,5 +1,7 @@
 package util;
 
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Formatter;
@@ -59,6 +61,28 @@ public class TestUtils {
             formatter.format("%02x", b);
         }
         return formatter.toString();
+    }
+
+    public static String loadString(String name) {
+        var url = TestUtils.class.getResource(name);
+
+        if (url == null) {
+            throw new AssertionError("Missing resource: " + name);
+        }
+
+        try (var reader = new InputStreamReader(url.openStream())) {
+            var buffer = new StringBuilder();
+            int c;
+
+            while ((c = reader.read()) != -1) {
+                buffer.append((char)c);
+            }
+
+            return buffer.toString();
+        }
+        catch (IOException e) {
+            throw new AssertionError();
+        }
     }
 
 }

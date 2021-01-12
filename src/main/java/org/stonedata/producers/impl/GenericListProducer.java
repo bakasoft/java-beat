@@ -4,6 +4,8 @@ import org.stonedata.util.GenericList;
 import org.stonedata.errors.StoneException;
 import org.stonedata.producers.ArrayProducer;
 
+import java.lang.reflect.Type;
+
 public class GenericListProducer implements ArrayProducer {
 
     @Override
@@ -19,6 +21,11 @@ public class GenericListProducer implements ArrayProducer {
         else {
             throw new StoneException();
         }
+    }
+
+    @Override
+    public Type getComponentTypeHint() {
+        return null;
     }
 
     @Override

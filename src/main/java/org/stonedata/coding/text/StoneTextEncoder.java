@@ -158,20 +158,25 @@ public class StoneTextEncoder implements StoneCharEncoder {
     }
 
     private void writeValue(Object value, ValueExaminer examiner, StoneCharOutput output) throws IOException {
-        output.write('(');
-
         var args = examiner.computeArguments(value);
 
-        for (var i = 0; i < args.size(); i++) {
-            if (i > 0) {
-                output.write(',');
-                output.space();
+        if (args.size() == 1) {
+            write(args.get(0), output);
+        }
+        else {
+            output.write('(');
+
+            for (var i = 0; i < args.size(); i++) {
+                if (i > 0) {
+                    output.write(',');
+                    output.space();
+                }
+
+                write(args.get(i), output);
             }
 
-            write(args.get(i), output);
+            output.write(')');
         }
-
-        output.write(')');
     }
 
     private void writeChar(char value, StoneCharOutput output) throws IOException {
@@ -191,18 +196,22 @@ public class StoneTextEncoder implements StoneCharEncoder {
     }
 
     private void writeString(String value, StoneCharOutput output) throws IOException {
-        // TODO check for tokens
-        var length = value.length();
-
-        output.write('"');
-
-        for (var i = 0; i < length; i++) {
-            var chr = value.charAt(i);
-
-            writeUnquotedChar(chr, output);
+        if (value.matches("[a-zA-Z0-9_./+-]+")) {
+            output.write(value);
         }
+        else {
+            var length = value.length();
 
-        output.write('"');
+            output.write('"');
+
+            for (var i = 0; i < length; i++) {
+                var chr = value.charAt(i);
+
+                writeUnquotedChar(chr, output);
+            }
+
+            output.write('"');
+        }
     }
 
     private void writeNull(StoneCharOutput output) throws IOException {

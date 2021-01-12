@@ -4,6 +4,8 @@ import org.stonedata.util.GenericObject;
 import org.stonedata.errors.StoneException;
 import org.stonedata.producers.ObjectProducer;
 
+import java.lang.reflect.Type;
+
 public class GenericObjectProducer implements ObjectProducer {
 
     @Override
@@ -19,6 +21,11 @@ public class GenericObjectProducer implements ObjectProducer {
         else {
             throw new StoneException();
         }
+    }
+
+    @Override
+    public Type getTypeHint(String key) {
+        return null;
     }
 
     @Override

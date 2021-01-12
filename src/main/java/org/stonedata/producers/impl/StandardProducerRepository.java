@@ -6,6 +6,7 @@ import org.stonedata.producers.ObjectProducer;
 import org.stonedata.producers.ProducerRepository;
 import org.stonedata.producers.ValueProducer;
 
+import java.lang.reflect.Type;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -39,8 +40,10 @@ public class StandardProducerRepository implements ProducerRepository {
         makers.put(type, maker);
     }
 
-    private <T> T findMakerG(Class<T> typeClass, String typeName, T defaultValue) {
+    private <T> T findMakerG(Class<T> typeClass, String typeName, T defaultValue, Type typeHint) {
         var maker = makers.get(typeName);
+
+        // TODO consider typeHint
 
         if (maker != null) {
             if (typeClass.isInstance(maker)) {
@@ -71,18 +74,18 @@ public class StandardProducerRepository implements ProducerRepository {
     }
 
     @Override
-    public ObjectProducer findObjectMaker(String type) {
-        return findMakerG(ObjectProducer.class, type, genericObjectProducer);
+    public ObjectProducer findObjectProducer(String type, Type typeHint) {
+        return findMakerG(ObjectProducer.class, type, genericObjectProducer, typeHint);
     }
 
     @Override
-    public ArrayProducer findArrayMaker(String type) {
-        return findMakerG(ArrayProducer.class, type, genericArrayProducer);
+    public ArrayProducer findArrayProducer(String type, Type typeHint) {
+        return findMakerG(ArrayProducer.class, type, genericArrayProducer, typeHint);
     }
 
     @Override
-    public ValueProducer findValueMaker(String type) {
-        return findMakerG(ValueProducer.class, type, genericValueProducer);
+    public ValueProducer findValueProducer(String type, Type typeHint) {
+        return findMakerG(ValueProducer.class, type, genericValueProducer, typeHint);
     }
 
     public ObjectProducer getGenericObjectMaker() {

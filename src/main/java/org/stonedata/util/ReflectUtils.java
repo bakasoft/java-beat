@@ -1,10 +1,12 @@
 package org.stonedata.util;
 
+import org.stonedata.errors.ConversionException;
+
 public class ReflectUtils {
     public static Object convertTo(Object value, Class<?> type) {
         if (value == null) {
             if (type.isPrimitive()) {
-                throw new RuntimeException("Cannot convert null to a primitive.");
+                throw new ConversionException("Cannot convert null to a primitive.");
             }
             return null;
         }
@@ -15,7 +17,7 @@ public class ReflectUtils {
             var str = (String)value;
 
             if (str.length() != 1) {
-                throw new RuntimeException();
+                throw new ConversionException("Cannot reduce multi-char string to a single one.");
             }
 
             return str.charAt(0);
@@ -24,7 +26,7 @@ public class ReflectUtils {
             return ((Number)value).intValue();
         }
         else {
-            throw new RuntimeException("Cannot convert " + value.getClass() + " to " + type);
+            throw new ConversionException(value.getClass(), type);
         }
     }
 
