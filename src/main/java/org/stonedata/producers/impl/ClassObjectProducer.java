@@ -105,7 +105,7 @@ public class ClassObjectProducer implements ObjectProducer {
         var setter = setters.get(key);
 
         if (setter == null) {
-            throw new StoneException("not setter for " + key);
+            throw new StoneException("not setter for " + type.getName() + "[" + key + "]");
         }
 
         try {

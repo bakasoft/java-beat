@@ -4,6 +4,7 @@ import org.stonedata.coding.text.StoneTextDecoder;
 import org.stonedata.errors.MissingInputException;
 import org.stonedata.examiners.Examiner;
 import org.stonedata.examiners.ExaminerRepository;
+import org.stonedata.examiners.impl.DefaultExaminers;
 import org.stonedata.examiners.impl.StandardExaminerRepository;
 import org.stonedata.io.StoneCharInput;
 import org.stonedata.io.StoneCharOutput;
@@ -12,11 +13,10 @@ import org.stonedata.coding.text.StoneTextEncoder;
 import org.stonedata.producers.Producer;
 import org.stonedata.producers.ProducerRepository;
 import org.stonedata.producers.impl.ClassObjectProducer;
+import org.stonedata.producers.impl.DefaultProducers;
 import org.stonedata.producers.impl.StandardProducerRepository;
 
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.URL;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -24,32 +24,19 @@ public class Stone {
 
     private Map<Class<?>, Examiner> examiners;
     private Map<String, Producer> producers;
-    private Map<String, Class<?>> types;  // TODO: remove this?
     private ExaminerRepository examinerRepository;
     private ProducerRepository producerRepository;
 
     public Stone() {}
 
-    public Class<?> getType(String name) {
-        if (types == null) {
-            return null;
-        }
-        return types.get(name);
+    public void register(Class<?> type) {
+        registerExaminer(type);
+        registerProducer(type);
     }
 
-    public Class<?> putType(String name, Class<?> type) {
-        return getTypes().put(name, type);
-    }
-
-    public Map<String, Class<?>> getTypes() {
-        if (types == null) {
-            types = new LinkedHashMap<>();
-        }
-        return types;
-    }
-
-    public void setTypes(Map<String, Class<?>> types) {
-        this.types = types;
+    public void register(Class<?> type, String name) {
+        registerExaminer(type, name);
+        registerProducer(type, name);
     }
 
     public Examiner getExaminer(Class<?> type) {
@@ -59,8 +46,20 @@ public class Stone {
         return examiners.get(type);
     }
 
-    public Examiner putExaminer(Class<?> type, Examiner examiner) {
-        return getExaminers().put(type, examiner);
+    public void registerExaminer(Class<?> type) {
+        registerExaminer(type, type.getSimpleName());
+    }
+
+    public void registerExaminer(Class<?> type, String name) {
+        registerExaminer(type, DefaultExaminers.createExaminer(type, name));
+    }
+
+    public void registerExaminer(Class<?> type, Examiner examiner) {
+        var map = getExaminers();
+        if (map.containsKey(type)) {
+            throw new RuntimeException();
+        }
+        map.put(type, examiner);
     }
 
     public Map<Class<?>, Examiner> getExaminers() {
@@ -81,8 +80,20 @@ public class Stone {
         return producers.get(name);
     }
 
-    public Producer putProducer(String name, Producer producer) {
-        return getProducers().put(name, producer);
+    public void registerProducer(Class<?> type) {
+        registerProducer(type, type.getSimpleName());
+    }
+
+    public void registerProducer(Class<?> type, String name) {
+        registerProducer(name, DefaultProducers.createProducer(type));
+    }
+
+    public void registerProducer(String name, Producer producer) {
+        var map = getProducers();
+        if (map.containsKey(name)) {
+            throw new RuntimeException();
+        }
+        map.put(name, producer);
     }
 
     public Map<String, Producer> getProducers() {
@@ -137,6 +148,10 @@ public class Stone {
         var producer = new ClassObjectProducer(type);
         var result = decoder.readObject(input, producer, null);
         return type.cast(result);
+    }
+
+    public Object readText(String input) throws IOException {
+        return readText(new SequenceInput(input));
     }
 
     public Object readText(StoneCharInput input) throws IOException {

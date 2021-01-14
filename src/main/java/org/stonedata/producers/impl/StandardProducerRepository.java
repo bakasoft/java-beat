@@ -2,7 +2,6 @@ package org.stonedata.producers.impl;
 
 import org.stonedata.Stone;
 import org.stonedata.errors.ProducerNotFoundException;
-import org.stonedata.errors.StoneException;
 import org.stonedata.producers.ArrayProducer;
 import org.stonedata.producers.ObjectProducer;
 import org.stonedata.producers.ProducerRepository;
@@ -32,20 +31,16 @@ public class StandardProducerRepository implements ProducerRepository {
             }
         }
 
-        Type type = stone.getType(name);
+        if (typeHint != null) {
+            var defaultProducer = DefaultProducers.tryCreateObjectProducer(typeHint);
 
-        if (type == null) {
-            type = typeHint;
-        }
+            if (defaultProducer != null) {
+                if (name != null) {
+                    stone.registerProducer(name, defaultProducer);
+                }
 
-        var defaultProducer = DefaultProducers.tryCreateObjectProducer(type);
-
-        if (defaultProducer != null) {
-            if (name != null) {
-                stone.putProducer(name, defaultProducer);
+                return defaultProducer;
             }
-
-            return defaultProducer;
         }
 
         return GenericObjectProducer.INSTANCE;
@@ -65,20 +60,16 @@ public class StandardProducerRepository implements ProducerRepository {
             }
         }
 
-        Type type = stone.getType(name);
+        if (typeHint != null) {
+            var defaultProducer = DefaultProducers.tryCreateArrayProducer(typeHint);
 
-        if (type == null) {
-            type = typeHint;
-        }
+            if (defaultProducer != null) {
+                if (name != null) {
+                    stone.registerProducer(name, defaultProducer);
+                }
 
-        var defaultProducer = DefaultProducers.tryCreateArrayProducer(type);
-
-        if (defaultProducer != null) {
-            if (name != null) {
-                stone.putProducer(name, defaultProducer);
+                return defaultProducer;
             }
-
-            return defaultProducer;
         }
 
         return GenericListProducer.INSTANCE;
@@ -98,20 +89,16 @@ public class StandardProducerRepository implements ProducerRepository {
             }
         }
 
-        Type type = stone.getType(name);
+        if (typeHint != null) {
+            var defaultProducer = DefaultProducers.tryCreateValueProducer(typeHint);
 
-        if (type == null) {
-            type = typeHint;
-        }
+            if (defaultProducer != null) {
+                if (name != null) {
+                    stone.registerProducer(name, defaultProducer);
+                }
 
-        var defaultProducer = DefaultProducers.tryCreateValueProducer(type);
-
-        if (defaultProducer != null) {
-            if (name != null) {
-                stone.putProducer(name, defaultProducer);
+                return defaultProducer;
             }
-
-            return defaultProducer;
         }
 
         return GenericValueProducer.INSTANCE;

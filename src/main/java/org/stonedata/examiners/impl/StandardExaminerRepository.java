@@ -24,19 +24,7 @@ public class StandardExaminerRepository implements ExaminerRepository {
         if (examiner != null) {
             return examiner;  // Best scenario
         }
-        else if (type.isArray()) {
-            return ObjectArrayExaminer.INSTANCE;  // Any array
-        }
-        else if (List.class.isAssignableFrom(type)) {
-            return ListExaminer.ANONYMOUS_INSTANCE;  // Any List
-        }
-        else if (Map.class.isAssignableFrom(type)) {
-            return MapExaminer.ANONYMOUS_INSTANCE;  // Any List
-        }
-        else if (type == Duration.class) {
-            return new DurationExaminer(null);
-        }
 
-        return new ClassObjectExaminer(type, null);
+        return DefaultExaminers.createExaminer(type, null);
     }
 }
