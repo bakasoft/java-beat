@@ -4,6 +4,7 @@ import org.stonedata.coding.text.StoneTextDecoder;
 import org.stonedata.errors.MissingInputException;
 import org.stonedata.examiners.Examiner;
 import org.stonedata.examiners.ExaminerRepository;
+import org.stonedata.examiners.ValueExaminer;
 import org.stonedata.examiners.impl.DefaultExaminers;
 import org.stonedata.examiners.impl.StandardExaminerRepository;
 import org.stonedata.io.StoneCharInput;
@@ -12,13 +13,18 @@ import org.stonedata.io.impl.*;
 import org.stonedata.coding.text.StoneTextEncoder;
 import org.stonedata.producers.Producer;
 import org.stonedata.producers.ProducerRepository;
+import org.stonedata.producers.ValueProducer;
 import org.stonedata.producers.impl.ClassObjectProducer;
 import org.stonedata.producers.impl.DefaultProducers;
 import org.stonedata.producers.impl.StandardProducerRepository;
 
 import java.io.IOException;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 public class Stone {
 
@@ -26,6 +32,8 @@ public class Stone {
     private Map<String, Producer> producers;
     private ExaminerRepository examinerRepository;
     private ProducerRepository producerRepository;
+
+    private boolean skipEncodingNullFields;
 
     public Stone() {}
 
@@ -82,6 +90,46 @@ public class Stone {
 
     public void registerProducer(Class<?> type) {
         registerProducer(type, type.getSimpleName());
+    }
+
+    public <T> void registerValueProducer(Class<T> type, Function<Object, T> maker) {
+        ValueProducer producer = (typeName, args) -> {
+            if (args.size() != 1) {
+                throw new RuntimeException();
+            }
+
+            return maker.apply(args.get(0));
+        };
+
+        registerProducer(type.getSimpleName(), producer);
+    }
+
+    public <T> void registerValueProducer(Class<T> type, BiFunction<Object, Object, T> maker) {
+        ValueProducer producer = (typeName, args) -> {
+            if (args.size() != 2) {
+                throw new RuntimeException();
+            }
+
+            return maker.apply(args.get(0), args.get(1));
+        };
+
+        registerProducer(type.getSimpleName(), producer);
+    }
+
+    public <T> void registerValueExaminer(Class<T> type, Function<T, List<Object>> encoder) {
+        registerExaminer(type, new ValueExaminer() {
+            @Override
+            public List<Object> computeArguments(Object value) {
+                var tobj = type.cast(value);
+
+                return encoder.apply(tobj);
+            }
+
+            @Override
+            public String getType() {
+                return type.getSimpleName();
+            }
+        });
     }
 
     public void registerProducer(Class<?> type, String name) {
@@ -179,7 +227,16 @@ public class Stone {
         var repository = getExaminerRepository();
         var encoder = new StoneTextEncoder(repository);
 
+        encoder.setSkipEncodingNullFields(skipEncodingNullFields);
+
         encoder.write(value, output);
     }
 
+    public boolean isSkipEncodingNullFields() {
+        return skipEncodingNullFields;
+    }
+
+    public void setSkipEncodingNullFields(boolean skipEncodingNullFields) {
+        this.skipEncodingNullFields = skipEncodingNullFields;
+    }
 }

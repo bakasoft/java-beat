@@ -1,8 +1,11 @@
 package org.stonedata.examiners.impl;
 
 import org.stonedata.examiners.Examiner;
+import org.stonedata.examiners.ValueExaminer;
+import org.stonedata.util.GenericValue;
 
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -23,6 +26,19 @@ public class DefaultExaminers {
         }
         else if (type == Duration.class) {
             return new DurationExaminer(name);
+        }
+        else if (type == GenericValue.class) {
+            return new ValueExaminer() {
+                @Override
+                public List<Object> computeArguments(Object value) {
+                    return Arrays.asList(((GenericValue)value).getArguments());
+                }
+
+                @Override
+                public String getType() {
+                    return name;
+                }
+            };
         }
 
         return new ClassObjectExaminer(type, name);

@@ -6,6 +6,14 @@ public class PP {
         return str(String.valueOf(c));
     }
 
+    public static String str(Object value) {
+        if (value == null) {
+            return "null";
+        }
+
+        return str(value.toString());
+    }
+
     public static String str(String value) {
         if (value.indexOf('\"') != -1 && value.indexOf('\'') == -1) {
             return str(value, '\'');

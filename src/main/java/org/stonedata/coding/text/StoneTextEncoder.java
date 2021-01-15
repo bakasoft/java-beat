@@ -18,6 +18,8 @@ public class StoneTextEncoder implements StoneCharEncoder {
     private final ExaminerRepository examiners;
     private boolean useStandardExaminers;
 
+    private boolean skipEncodingNullFields;
+
     public StoneTextEncoder(ExaminerRepository examiners) {
         this(examiners, new StandardReferenceStore());
     }
@@ -110,18 +112,20 @@ public class StoneTextEncoder implements StoneCharEncoder {
         for (var entryKey : entryKeys) {
             var entryValue = examiner.getValue(value, entryKey);
 
-            if (i > 0) {
-                output.write(',');
-                output.line();
+            if (entryValue != null || !skipEncodingNullFields) {
+                if (i > 0) {
+                    output.write(',');
+                    output.line();
+                }
+
+                writeString(entryKey, output);
+
+                output.write(':');
+                output.space();
+
+                write(entryValue, output);
+                i++;
             }
-
-            writeString(entryKey, output);
-
-            output.write(':');
-            output.space();
-
-            write(entryValue, output);
-            i++;
         }
 
         output.indent(-1);
@@ -230,4 +234,11 @@ public class StoneTextEncoder implements StoneCharEncoder {
     }
 
 
+    public boolean isSkipEncodingNullFields() {
+        return skipEncodingNullFields;
+    }
+
+    public void setSkipEncodingNullFields(boolean skipEncodingNullFields) {
+        this.skipEncodingNullFields = skipEncodingNullFields;
+    }
 }

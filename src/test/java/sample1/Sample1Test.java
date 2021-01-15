@@ -13,6 +13,7 @@ import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static util.TestUtils.assertSameOutput;
 
 class Sample1Test {
 
@@ -25,15 +26,11 @@ class Sample1Test {
         stone.register(Text.class);
 
         var text = TestUtils.loadString("/sample1.st");
-        var widget = stone.readText(text);
+        var result = stone.readText(text);
 
-        assertTrue(widget instanceof Widget, "Result must implement the interface");
+        assertTrue(result instanceof Widget, "Result must implement the interface");
 
-        var buffer = new StringBuilder();
-
-        stone.writeText(widget, buffer, true);
-
-        assertEquals(text, buffer.toString());
+        assertSameOutput(stone, result, text);
     }
 
 }

@@ -1,12 +1,53 @@
 package util;
 
+import org.stonedata.Stone;
+
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Formatter;
+import java.util.Objects;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TestUtils {
+
+    public static void assertSameOutput(Stone stone, Object result, String text) throws IOException {
+        var buffer = new StringBuilder();
+
+        stone.writeText(result, buffer, true);
+
+        var expectedLines = text.split("\n");
+        var actualLines = buffer.toString().split("\n");
+
+        int eI = 0;
+        int aI = 0;
+
+        while (eI < expectedLines.length || aI < actualLines.length) {
+            var expectedLine = eI < expectedLines.length ? expectedLines[eI].trim() : "";
+            var actualLine = aI < actualLines.length ? actualLines[aI].trim() : "";
+
+            if (Objects.equals(expectedLine, actualLine)) {
+                eI++;
+                aI++;
+            }
+            else if (expectedLine.isEmpty()) {
+                eI++;
+            }
+            else if (actualLine.isEmpty()) {
+                aI++;
+            }
+            else {
+                var message = String.format(
+                        "" +
+                                "Expected (Ln. %s): %s\n" +
+                                "But was  (Ln. %s): %s\n",
+                        eI, expectedLine, aI, actualLine);
+                throw new AssertionError(message);
+            }
+        }
+    }
 
     public static byte[] parseBinaryBytes(String input) {
         var items = input.split(" +");

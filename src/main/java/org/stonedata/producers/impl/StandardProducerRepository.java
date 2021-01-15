@@ -19,26 +19,23 @@ public class StandardProducerRepository implements ProducerRepository {
 
     @Override
     public ObjectProducer findObjectProducer(String name, Type typeHint) {
-        var producer = stone.getProducer(name);
+        if (name != null) {
+            var producer = stone.getProducer(name);
 
-        if (producer != null) {
             if (producer instanceof ObjectProducer) {
                 return (ObjectProducer) producer;
             }
-            else {
+            else if (producer == null) {
+                throw new ProducerNotFoundException("object", name, typeHint);
+            } else {
                 throw new ProducerNotFoundException(String.format(
                         "Producer %s is not an object producer.", name));
             }
         }
-
-        if (typeHint != null) {
+        else if (typeHint != null) {
             var defaultProducer = DefaultProducers.tryCreateObjectProducer(typeHint);
 
             if (defaultProducer != null) {
-                if (name != null) {
-                    stone.registerProducer(name, defaultProducer);
-                }
-
                 return defaultProducer;
             }
         }

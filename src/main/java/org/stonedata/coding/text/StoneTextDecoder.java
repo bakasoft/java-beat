@@ -1,5 +1,6 @@
 package org.stonedata.coding.text;
 
+import org.stonedata.errors.UnknownReferenceException;
 import org.stonedata.producers.ObjectProducer;
 import org.stonedata.references.StoneReferenceStore;
 import org.stonedata.errors.StoneException;
@@ -83,7 +84,7 @@ public class StoneTextDecoder implements StoneCharDecoder {
         }
         else if (refValue != null) {
             if (!references.containsReference(strValue, refValue)) {
-                 throw new RuntimeException("Unknown ref: " + strValue + "/" + refValue);
+                 throw new UnknownReferenceException(strValue, refValue);
             }
             return references.getValue(strValue, refValue);
         }
@@ -190,7 +191,7 @@ public class StoneTextDecoder implements StoneCharDecoder {
         do {
             skipWhitespace(input);
 
-            if (input.tryPull(')')) {
+            if (input.peek(')')) {
                 break;
             }
 
@@ -201,6 +202,8 @@ public class StoneTextDecoder implements StoneCharDecoder {
             skipWhitespace(input);
         }
         while (input.tryPull(','));
+
+        input.expect(')');
 
         return maker.newInstance(type, arguments);
     }

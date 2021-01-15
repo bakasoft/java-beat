@@ -1,6 +1,7 @@
 package sample0;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static util.TestUtils.assertSameOutput;
 
 import org.junit.jupiter.api.Test;
 import org.stonedata.Stone;
@@ -15,12 +16,9 @@ class Sample0Test {
     void testSample0() throws IOException {
         var stone = new Stone();
         var text = TestUtils.loadString("/sample0.st");
-        var release = stone.readText(text, Release.class);
-        var buffer = new StringBuilder();
+        var result = stone.readText(text, Release.class);
 
-        stone.writeText(release, buffer, true);
-
-        assertEquals(text, buffer.toString());
+        assertSameOutput(stone, result, text);
     }
 
 }

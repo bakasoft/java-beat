@@ -25,6 +25,9 @@ public class ReflectUtils {
         else if (value instanceof Number && type == Integer.class) {
             return ((Number)value).intValue();
         }
+        else if (type == String.class) {
+            return value.toString();
+        }
         else {
             throw new ConversionException(value.getClass(), type);
         }
