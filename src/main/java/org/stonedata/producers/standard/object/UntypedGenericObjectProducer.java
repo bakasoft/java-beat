@@ -1,28 +1,26 @@
-package org.stonedata.producers.impl;
+package org.stonedata.producers.standard.object;
 
 import org.stonedata.errors.StoneException;
 import org.stonedata.producers.ObjectProducer;
-import org.stonedata.types.GenericObject;
+import org.stonedata.types.MapObject;
 
 import java.lang.reflect.Type;
 
-public class TypedGenericObjectProducer implements ObjectProducer {
+public class UntypedGenericObjectProducer implements ObjectProducer {
 
-    private final String typeName;
+    public static final UntypedGenericObjectProducer INSTANCE = new UntypedGenericObjectProducer();
 
-    public TypedGenericObjectProducer(String typeName) {
-        this.typeName = typeName;
-    }
+    private UntypedGenericObjectProducer() {}
 
     @Override
     public Object beginInstance() {
-        return new GenericObject(typeName);
+        return new MapObject();
     }
 
     @Override
     public void set(Object obj, String key, Object value) {
-        if (obj instanceof GenericObject) {
-            ((GenericObject) obj).set(key, value);
+        if (obj instanceof MapObject) {
+            ((MapObject) obj).set(key, value);
         }
         else {
             throw new StoneException();

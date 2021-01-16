@@ -1,6 +1,9 @@
-package org.stonedata.producers.impl;
+package org.stonedata.producers.standard;
 
 import org.stonedata.producers.ObjectProducer;
+import org.stonedata.producers.standard.object.ClassObjectProducer;
+import org.stonedata.producers.standard.object.TypedGenericObjectProducer;
+import org.stonedata.producers.standard.object.UntypedGenericObjectProducer;
 
 import java.lang.reflect.Type;
 import java.util.Map;

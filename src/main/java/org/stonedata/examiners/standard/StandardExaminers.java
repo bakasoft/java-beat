@@ -1,7 +1,13 @@
-package org.stonedata.examiners.impl;
+package org.stonedata.examiners.standard;
 
 import org.stonedata.examiners.Examiner;
 import org.stonedata.examiners.ValueExaminer;
+import org.stonedata.examiners.standard.array.ListExaminer;
+import org.stonedata.examiners.standard.array.ObjectArrayExaminer;
+import org.stonedata.examiners.standard.object.ClassObjectExaminer;
+import org.stonedata.examiners.standard.object.MapExaminer;
+import org.stonedata.examiners.standard.value.ClassEnumExaminer;
+import org.stonedata.examiners.standard.value.DurationExaminer;
 import org.stonedata.types.GenericValue;
 
 import java.time.Duration;
@@ -9,7 +15,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-public class DefaultExaminers {
+public class StandardExaminers {
 
     public static Examiner createExaminer(Class<?> type, String name) {
         if (type.isArray()) {

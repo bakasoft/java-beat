@@ -1,4 +1,4 @@
-package org.stonedata.examiners.impl;
+package org.stonedata.examiners.standard.object;
 
 import org.stonedata.errors.StoneException;
 import org.stonedata.examiners.ObjectExaminer;

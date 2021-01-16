@@ -1,4 +1,4 @@
-package org.stonedata.producers.impl;
+package org.stonedata.producers.standard.array;
 
 import org.stonedata.errors.StoneException;
 import org.stonedata.producers.ArrayProducer;

@@ -5,8 +5,8 @@ import org.stonedata.errors.MissingInputException;
 import org.stonedata.examiners.Examiner;
 import org.stonedata.examiners.ExaminerRepository;
 import org.stonedata.examiners.ValueExaminer;
-import org.stonedata.examiners.impl.DefaultExaminers;
-import org.stonedata.examiners.impl.StandardExaminerRepository;
+import org.stonedata.examiners.standard.StandardExaminers;
+import org.stonedata.examiners.standard.repository.StandardExaminerRepository;
 import org.stonedata.io.StoneCharInput;
 import org.stonedata.io.StoneCharOutput;
 import org.stonedata.io.impl.*;
@@ -14,8 +14,8 @@ import org.stonedata.coding.text.StoneTextEncoder;
 import org.stonedata.producers.Producer;
 import org.stonedata.producers.ProducerRepository;
 import org.stonedata.producers.ValueProducer;
-import org.stonedata.producers.impl.StandardProducers;
-import org.stonedata.producers.impl.StandardProducerRepository;
+import org.stonedata.producers.standard.StandardProducers;
+import org.stonedata.producers.standard.repository.StandardProducerRepository;
 
 import java.io.IOException;
 import java.util.LinkedHashMap;
@@ -57,7 +57,7 @@ public class Stone {
     }
 
     public void registerExaminer(Class<?> type, String name) {
-        registerExaminer(type, DefaultExaminers.createExaminer(type, name));
+        registerExaminer(type, StandardExaminers.createExaminer(type, name));
     }
 
     public void registerExaminer(Class<?> type, Examiner examiner) {

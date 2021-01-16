@@ -1,23 +1,22 @@
-package org.stonedata.producers.impl;
+package org.stonedata.producers.standard.value;
 
 import org.stonedata.errors.StoneException;
 import org.stonedata.producers.ValueProducer;
+import org.stonedata.util.ReflectUtils;
 
-import java.time.Duration;
 import java.util.List;
 
-public class DurationProducer implements ValueProducer {
+public class IntegerProducer implements ValueProducer {
     @Override
     public Object newInstance(List<?> arguments) {
         if (arguments.isEmpty()) {
             return 0;
         }
         else if (arguments.size() == 1) {
-            var value = String.valueOf(arguments.get(0));
-            return Duration.parse(value);
+            return ReflectUtils.convertTo(arguments.get(0), Integer.class);
         }
         else {
-            throw new StoneException("Expected one argument.");
+            throw new StoneException("Expected one argument of an integer.");
         }
     }
 }

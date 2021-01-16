@@ -1,8 +1,7 @@
-package org.stonedata.producers.impl;
+package org.stonedata.producers.standard;
 
 import org.stonedata.producers.Producer;
 
-import java.lang.reflect.Type;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;

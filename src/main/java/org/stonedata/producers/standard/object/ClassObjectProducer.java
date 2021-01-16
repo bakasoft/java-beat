@@ -1,4 +1,4 @@
-package org.stonedata.producers.impl;
+package org.stonedata.producers.standard.object;
 
 import org.stonedata.errors.ConversionException;
 import org.stonedata.producers.ObjectProducer;

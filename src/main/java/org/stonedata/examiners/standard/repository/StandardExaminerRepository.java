@@ -1,13 +1,9 @@
-package org.stonedata.examiners.impl;
+package org.stonedata.examiners.standard.repository;
 
 import org.stonedata.Stone;
 import org.stonedata.examiners.Examiner;
-import org.stonedata.errors.StoneException;
 import org.stonedata.examiners.ExaminerRepository;
-
-import java.time.Duration;
-import java.util.List;
-import java.util.Map;
+import org.stonedata.examiners.standard.StandardExaminers;
 
 public class StandardExaminerRepository implements ExaminerRepository {
 
@@ -32,6 +28,6 @@ public class StandardExaminerRepository implements ExaminerRepository {
             return null;
         }
 
-        return DefaultExaminers.createExaminer(type, null);
+        return StandardExaminers.createExaminer(type, null);
     }
 }

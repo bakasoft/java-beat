@@ -1,28 +1,26 @@
-package org.stonedata.producers.impl;
+package org.stonedata.producers.standard.array;
 
 import org.stonedata.errors.StoneException;
 import org.stonedata.producers.ArrayProducer;
-import org.stonedata.types.GenericList;
+import org.stonedata.types.UntypedList;
 
 import java.lang.reflect.Type;
 
-public class SoftTypedListProducer implements ArrayProducer {
+public class UntypedGenericListProducer implements ArrayProducer {
 
-    private final String type;
+    public static final UntypedGenericListProducer INSTANCE = new UntypedGenericListProducer();
 
-    public SoftTypedListProducer(String type) {
-        this.type = type;
-    }
+    private UntypedGenericListProducer() {}
 
     @Override
     public Object beginInstance() {
-        return new GenericList(type);
+        return new UntypedList();
     }
 
     @Override
     public void add(Object obj, Object item) {
-        if (obj instanceof GenericList) {
-            ((GenericList) obj).add(item);
+        if (obj instanceof UntypedList) {
+            ((UntypedList) obj).add(item);
         }
         else {
             throw new StoneException();

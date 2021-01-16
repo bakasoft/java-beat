@@ -1,4 +1,4 @@
-package org.stonedata.producers.impl;
+package org.stonedata.producers.standard.value;
 
 import org.stonedata.producers.ValueProducer;
 import org.stonedata.types.EmptyValue;

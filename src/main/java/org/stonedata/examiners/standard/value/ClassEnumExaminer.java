@@ -1,4 +1,4 @@
-package org.stonedata.examiners.impl;
+package org.stonedata.examiners.standard.value;
 
 import org.stonedata.examiners.ValueExaminer;
 

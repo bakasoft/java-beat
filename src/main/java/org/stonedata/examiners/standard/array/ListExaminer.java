@@ -1,4 +1,4 @@
-package org.stonedata.examiners.impl;
+package org.stonedata.examiners.standard.array;
 
 import org.stonedata.examiners.ArrayExaminer;
 
