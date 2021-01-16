@@ -11,15 +11,12 @@ import java.util.Map;
 public class StandardObjectProducers {
     private StandardObjectProducers() {}
 
-    public static ObjectProducer create(Type typeHint, String typeName) {
+    public static ObjectProducer tryCreate(Type typeHint) {
         if (typeHint instanceof Class) {
             var typeClass = (Class<?>) typeHint;
 
             if (Map.class.isAssignableFrom(typeClass)) {
-                if (typeName == null) {
-                    return UntypedGenericObjectProducer.INSTANCE;
-                }
-                return new TypedGenericObjectProducer(typeName);
+                return UntypedGenericObjectProducer.INSTANCE;
             }
             else if (typeClass.isInterface()) {
                 throw new RuntimeException("Cannot instantiate an interface: " + typeClass);
@@ -28,9 +25,6 @@ public class StandardObjectProducers {
             return new ClassObjectProducer(typeClass);
         }
 
-        if (typeName == null) {
-            return UntypedGenericObjectProducer.INSTANCE;
-        }
-        return new TypedGenericObjectProducer(typeName);
+        return null;
     }
 }

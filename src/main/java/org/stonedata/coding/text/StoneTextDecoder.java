@@ -3,7 +3,16 @@ package org.stonedata.coding.text;
 import org.stonedata.coding.StoneCharDecoder;
 import org.stonedata.errors.InvalidSyntaxException;
 import org.stonedata.io.StoneCharInput;
+import org.stonedata.producers.ArrayProducer;
+import org.stonedata.producers.ObjectProducer;
 import org.stonedata.producers.ProducerRepository;
+import org.stonedata.producers.ValueProducer;
+import org.stonedata.producers.standard.array.SoftTypedListProducer;
+import org.stonedata.producers.standard.array.UntypedGenericListProducer;
+import org.stonedata.producers.standard.object.TypedGenericObjectProducer;
+import org.stonedata.producers.standard.object.UntypedGenericObjectProducer;
+import org.stonedata.producers.standard.value.TypedValueProducer;
+import org.stonedata.producers.standard.value.UntypedValueProducer;
 import org.stonedata.references.ReferenceTracker;
 import org.stonedata.references.impl.StandardReferenceTracker;
 import org.stonedata.util.PP;
@@ -164,13 +173,13 @@ public class StoneTextDecoder implements StoneCharDecoder {
     }
 
     private Object continueWithLiteral(String literal, Type typeHint) {
-        var producer = producers.findValueProducer(null, typeHint);
+        var producer = valueProducer(null, typeHint);
 
         return producer.newInstance(List.of(literal));
     }
 
     private Object readObject(StoneCharInput input, String typeName, Type typeHint) throws IOException {
-        var producer = producers.findObjectProducer(typeName, typeHint);
+        var producer = objectProducer(typeName, typeHint);
         var obj = producer.beginInstance();
 
         input.expect('{');
@@ -205,7 +214,7 @@ public class StoneTextDecoder implements StoneCharDecoder {
     }
 
     private Object readArray(StoneCharInput input, String typeName, Type typeHint) throws IOException {
-        var producer = producers.findArrayProducer(typeName, typeHint);
+        var producer = arrayProducer(typeName, typeHint);
         var componentTypeHint = producer.getComponentTypeHint();
         var arr = producer.beginInstance();
 
@@ -232,7 +241,7 @@ public class StoneTextDecoder implements StoneCharDecoder {
     }
 
     private Object readValue(StoneCharInput input, String typeName, Type typeHint) throws IOException {
-        var maker = producers.findValueProducer(typeName, typeHint);
+        var maker = valueProducer(typeName, typeHint);
         var arguments = new ArrayList<>();
 
         input.expect('(');
@@ -255,6 +264,39 @@ public class StoneTextDecoder implements StoneCharDecoder {
         input.expect(')');
 
         return maker.newInstance(arguments);
+    }
+
+    private ObjectProducer objectProducer(String typeName, Type typeHint) {
+        var producer = producers.getObjectProducer(typeName, typeHint);
+        if (producer != null) {
+            return producer;
+        }
+        else if (typeName != null) {
+            return new TypedGenericObjectProducer(typeName);
+        }
+        return UntypedGenericObjectProducer.INSTANCE;
+    }
+
+    private ArrayProducer arrayProducer(String typeName, Type typeHint) {
+        var producer = producers.getArrayProducer(typeName, typeHint);
+        if (producer != null) {
+            return producer;
+        }
+        else if (typeName != null) {
+            return new SoftTypedListProducer(typeName);
+        }
+        return UntypedGenericListProducer.INSTANCE;
+    }
+
+    private ValueProducer valueProducer(String typeName, Type typeHint) {
+        var producer = producers.getValueProducer(typeName, typeHint);
+        if (producer != null) {
+            return producer;
+        }
+        else if (typeName != null) {
+            return new TypedValueProducer(typeName);
+        }
+        return UntypedValueProducer.INSTANCE;
     }
 
     // STATIC

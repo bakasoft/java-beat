@@ -21,7 +21,7 @@ public class StandardProducerRepository implements ProducerRepository {
     }
 
     @Override
-    public ObjectProducer findObjectProducer(String typeName, Type typeHint) {
+    public ObjectProducer getObjectProducer(String typeName, Type typeHint) {
         var producer = stone.getProducer(typeName);
         if (producer != null) {
             if (producer instanceof ObjectProducer) {
@@ -32,15 +32,15 @@ public class StandardProducerRepository implements ProducerRepository {
             }
         }
 
-        var standardProducer = StandardObjectProducers.create(typeHint, typeName);
-        if (typeName != null) {
+        var standardProducer = StandardObjectProducers.tryCreate(typeHint);
+        if (standardProducer != null && typeName != null) {
             stone.registerProducer(typeName, standardProducer);
         }
         return standardProducer;
     }
 
     @Override
-    public ArrayProducer findArrayProducer(String typeName, Type typeHint) {
+    public ArrayProducer getArrayProducer(String typeName, Type typeHint) {
         var producer = stone.getProducer(typeName);
         if (producer != null) {
             if (producer instanceof ArrayProducer) {
@@ -52,15 +52,15 @@ public class StandardProducerRepository implements ProducerRepository {
             }
         }
 
-        var standardProducer = StandardArrayProducers.create(typeHint, typeName);
-        if (typeName != null) {
+        var standardProducer = StandardArrayProducers.tryCreate(typeHint);
+        if (standardProducer != null && typeName != null) {
             stone.registerProducer(typeName, standardProducer);
         }
         return standardProducer;
     }
 
     @Override
-    public ValueProducer findValueProducer(String typeName, Type typeHint) {
+    public ValueProducer getValueProducer(String typeName, Type typeHint) {
         var producer = stone.getProducer(typeName);
         if (producer != null) {
             if (producer instanceof ValueProducer) {
@@ -72,8 +72,8 @@ public class StandardProducerRepository implements ProducerRepository {
             }
         }
 
-        var standardProducer = StandardValueProducers.create(typeHint, typeName);
-        if (typeName != null) {
+        var standardProducer = StandardValueProducers.tryCreate(typeHint);
+        if (standardProducer != null && typeName != null) {
             stone.registerProducer(typeName, standardProducer);
         }
         return standardProducer;

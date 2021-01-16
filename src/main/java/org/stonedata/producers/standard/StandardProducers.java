@@ -9,25 +9,21 @@ import java.util.Map;
 public class StandardProducers {
 
     public static Producer create(Class<?> type) {
-        return create(type, null);
-    }
-
-    public static Producer create(Class<?> type, String nameHint) {
         if (type.isArray()) {
-            return StandardArrayProducers.create(type, nameHint);
+            return StandardArrayProducers.tryCreate(type);
         }
         else if (type.isEnum()) {
-            return StandardValueProducers.create(type, nameHint);
+            return StandardValueProducers.tryCreate(type);
         }
         else if (List.class.isAssignableFrom(type)) {
-            return StandardArrayProducers.create(type, nameHint);
+            return StandardArrayProducers.tryCreate(type);
         }
         else if (Map.class.isAssignableFrom(type)) {
-            return StandardObjectProducers.create(type, nameHint);
+            return StandardObjectProducers.tryCreate(type);
         }
         else if (type == Duration.class) {
-            return StandardValueProducers.create(type, nameHint);
+            return StandardValueProducers.tryCreate(type);
         }
-        return StandardObjectProducers.create(type, nameHint);
+        return StandardObjectProducers.tryCreate(type);
     }
 }

@@ -4,8 +4,6 @@ import org.stonedata.producers.ValueProducer;
 import org.stonedata.producers.standard.value.ClassEnumProducer;
 import org.stonedata.producers.standard.value.DurationProducer;
 import org.stonedata.producers.standard.value.IntegerProducer;
-import org.stonedata.producers.standard.value.TypedValueProducer;
-import org.stonedata.producers.standard.value.UntypedValueProducer;
 
 import java.lang.reflect.Type;
 import java.time.Duration;
@@ -14,7 +12,7 @@ import java.time.Duration;
 public class StandardValueProducers {
     private StandardValueProducers() {}
 
-    public static ValueProducer create(Type type, String nameHint) {
+    public static ValueProducer tryCreate(Type type) {
         if (type instanceof Class) {
             var typeClass = (Class<?>)type;
 
@@ -29,10 +27,7 @@ public class StandardValueProducers {
             }
         }
 
-        if (nameHint == null) {
-            return UntypedValueProducer.INSTANCE;
-        }
-        return new TypedValueProducer(nameHint);
+        return null;
     }
 
 }

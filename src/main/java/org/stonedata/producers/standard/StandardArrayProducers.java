@@ -13,7 +13,7 @@ public class StandardArrayProducers {
 
     private StandardArrayProducers() {}
 
-    public static ArrayProducer create(Type type, String nameHint) {
+    public static ArrayProducer tryCreate(Type type) {
         if (type instanceof ParameterizedType) {
             var pType = (ParameterizedType)type;
             var pArgs = pType.getActualTypeArguments();
@@ -31,9 +31,6 @@ public class StandardArrayProducers {
 
         // TODO Detect Array Classes, Generic Arrays, Sets, etc.
 
-        if (nameHint == null) {
-            return UntypedGenericListProducer.INSTANCE;
-        }
-        return new SoftTypedListProducer(nameHint);
+        return null;
     }
 }
