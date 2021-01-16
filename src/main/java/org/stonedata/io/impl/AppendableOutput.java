@@ -4,11 +4,11 @@ import org.stonedata.io.StoneCharOutput;
 
 import java.io.IOException;
 
-public class StoneAppendableOutput implements StoneCharOutput {
+public class AppendableOutput implements StoneCharOutput {
 
     private final Appendable output;
 
-    public StoneAppendableOutput(Appendable output) {
+    public AppendableOutput(Appendable output) {
         this.output = output;
     }
 

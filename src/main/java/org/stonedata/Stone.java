@@ -9,10 +9,11 @@ import org.stonedata.producers.standard.StandardValueProducers;
 import org.stonedata.producers.standard.array.SoftTypedListProducer;
 import org.stonedata.producers.standard.object.SoftTypedObjectProducer;
 import org.stonedata.producers.standard.value.SoftTypedValueProducer;
+import org.stonedata.references.impl.NullReferenceProvider;
 import org.stonedata.repositories.ExaminerRepository;
 import org.stonedata.examiners.ValueExaminer;
 import org.stonedata.examiners.standard.StandardExaminers;
-import org.stonedata.repositories.standard.StandardExaminerRepository;
+import org.stonedata.repositories.standard.StoneExaminerRepository;
 import org.stonedata.io.StoneCharInput;
 import org.stonedata.io.StoneCharOutput;
 import org.stonedata.io.impl.*;
@@ -20,9 +21,7 @@ import org.stonedata.coding.text.StoneTextEncoder;
 import org.stonedata.producers.Producer;
 import org.stonedata.repositories.ProducerRepository;
 import org.stonedata.producers.ValueProducer;
-import org.stonedata.producers.standard.StandardProducers;
-import org.stonedata.repositories.standard.StandardProducerRepository;
-import org.stonedata.types.array.SoftTypedList;
+import org.stonedata.repositories.standard.StoneProducerRepository;
 
 import java.io.IOException;
 import java.util.LinkedHashMap;
@@ -210,7 +209,7 @@ public class Stone {
 
     public ExaminerRepository getExaminerRepository() {
         if (examinerRepository == null) {
-            examinerRepository = new StandardExaminerRepository(this);
+            examinerRepository = new StoneExaminerRepository(this);
         }
 
         return examinerRepository;
@@ -222,7 +221,7 @@ public class Stone {
 
     public ProducerRepository getProducerRepository() {
         if (producerRepository == null) {
-            producerRepository = new StandardProducerRepository(this);
+            producerRepository = new StoneProducerRepository(this);
         }
 
         return producerRepository;
@@ -268,16 +267,16 @@ public class Stone {
     }
 
     public void writeText(Object value, Appendable appendable) throws IOException {
-        writeText(value, new StoneAppendableOutput(appendable));
+        writeText(value, new AppendableOutput(appendable));
     }
 
     public void writeText(Object value, Appendable appendable, boolean prettyPrint) throws IOException {
-        writeText(value, prettyPrint ? new PrettyPrintOutput(appendable) : new StoneAppendableOutput(appendable));
+        writeText(value, prettyPrint ? new PrettyPrintOutput(appendable) : new AppendableOutput(appendable));
     }
 
     public void writeText(Object value, StoneCharOutput output) throws IOException {
         var repository = getExaminerRepository();
-        var encoder = new StoneTextEncoder(repository);
+        var encoder = new StoneTextEncoder(repository, NullReferenceProvider.INSTANCE);
 
         encoder.setSkipNullFields(skipEncodingNullFields);
 

@@ -12,11 +12,11 @@ import org.stonedata.producers.standard.StandardValueProducers;
 
 import java.lang.reflect.Type;
 
-public class StandardProducerRepository implements ProducerRepository {
+public class StoneProducerRepository implements ProducerRepository {
 
     private final Stone stone;
 
-    public StandardProducerRepository(Stone stone) {
+    public StoneProducerRepository(Stone stone) {
         this.stone = stone;
     }
 

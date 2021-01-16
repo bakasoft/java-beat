@@ -1,6 +1,7 @@
 package org.stonedata.coding.text;
 
 import org.stonedata.errors.CyclicDocumentException;
+import org.stonedata.errors.UnsupportedValueException;
 import org.stonedata.examiners.ArrayExaminer;
 import org.stonedata.examiners.Examiner;
 import org.stonedata.repositories.ExaminerRepository;
@@ -25,16 +26,12 @@ public class StoneTextEncoder implements StoneCharEncoder {
 
     private boolean skipNullFields;
 
-    private final Deque<Object> stack;
-
-    public StoneTextEncoder(ExaminerRepository examiners) {
-        this(examiners, NullReferenceProvider.INSTANCE);
-    }
+    private final Deque<Object> cycleStack;
 
     public StoneTextEncoder(ExaminerRepository examiners, ReferenceProvider references) {
         this.examiners = examiners;
         this.references = references;
-        this.stack = new ArrayDeque<>();
+        this.cycleStack = new ArrayDeque<>();
     }
 
     @Override
@@ -78,9 +75,7 @@ public class StoneTextEncoder implements StoneCharEncoder {
 
     private void writeExaminedWithTypeNameAndReference(StoneCharOutput output, Set<Object> writtenRefs, Object value, Examiner examiner, String typeName, String reference) throws IOException {
         writeString(output, typeName);
-        output.write('<');
-        writeString(output, reference);
-        output.write('>');
+        writeReference(output, reference);
         if (writtenRefs.add(reference + "\0" + typeName)) {
             output.space();
             writeExamined(output, writtenRefs, value, examiner);
@@ -94,9 +89,7 @@ public class StoneTextEncoder implements StoneCharEncoder {
     }
 
     private void writeExaminedWithReference(StoneCharOutput output, Set<Object> writtenRefs, Object value, Examiner examiner, String reference) throws IOException {
-        output.write('<');
-        writeString(output, reference);
-        output.write('>');
+        writeReference(output, reference);
         if (writtenRefs.add(reference + "\0")) {
             output.space();
             writeExamined(output, writtenRefs, value, examiner);
@@ -104,11 +97,11 @@ public class StoneTextEncoder implements StoneCharEncoder {
     }
 
     private void writeExamined(StoneCharOutput output, Set<Object> writtenRefs, Object value, Examiner examiner) throws IOException {
-        if (stack.contains(value)) {
+        if (cycleStack.contains(value)) {
             throw new CyclicDocumentException(value, examiner);
         }
 
-        stack.push(value);
+        cycleStack.push(value);
 
         if (examiner instanceof ObjectExaminer) {
             writeObject(output, writtenRefs, value, (ObjectExaminer) examiner);
@@ -120,16 +113,14 @@ public class StoneTextEncoder implements StoneCharEncoder {
             writeValue(output, writtenRefs, value, (ValueExaminer) examiner);
         }
         else {
-            throw new StoneException();
+            throw new UnsupportedValueException(examiner);
         }
 
-        stack.pop();
+        cycleStack.pop();
     }
 
     private void writeStandardValueWithReference(StoneCharOutput output, Set<Object> writtenRefs, Object value, String reference) throws IOException {
-        output.write('<');
-        writeString(output, reference);
-        output.write('>');
+        writeReference(output, reference);
         if (writtenRefs.add(reference + "\0")) {
             output.space();
             output.write('(');
@@ -155,7 +146,7 @@ public class StoneTextEncoder implements StoneCharEncoder {
             writeChar((Character)value, output);
         }
         else {
-            throw new StoneException();
+            throw new UnsupportedValueException(value);
         }
     }
 
@@ -240,6 +231,12 @@ public class StoneTextEncoder implements StoneCharEncoder {
 
         output.write(')');
 }
+
+    private static void writeReference(StoneCharOutput output, String reference) throws IOException {
+        output.write('<');
+        writeString(output, reference);
+        output.write('>');
+    }
 
     private static void writeChar(char value, StoneCharOutput output) throws IOException {
         output.write('"');

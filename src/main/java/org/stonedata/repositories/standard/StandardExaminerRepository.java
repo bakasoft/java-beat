@@ -1,33 +1,58 @@
 package org.stonedata.repositories.standard;
 
-import org.stonedata.Stone;
 import org.stonedata.examiners.Examiner;
 import org.stonedata.repositories.ExaminerRepository;
-import org.stonedata.examiners.standard.StandardExaminers;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Predicate;
 
 public class StandardExaminerRepository implements ExaminerRepository {
 
-    private final Stone stone;
+    private Map<Object, Examiner> valueExaminers;
+    private List<TestExaminer> testExaminers;
 
-    public StandardExaminerRepository(Stone stone) {
-        this.stone = stone;
+    public void registerForValue(Examiner examiner, Object value) {
+        if (valueExaminers == null) {
+            valueExaminers = new HashMap<>();
+        }
+        valueExaminers.put(value, examiner);
+    }
+
+    public void registerForCondition(Examiner examiner, Predicate<Object> condition) {
+        if (testExaminers == null) {
+            testExaminers = new ArrayList<>();
+        }
+        testExaminers.add(new TestExaminer(condition, examiner));
     }
 
     @Override
     public Examiner getExaminerFor(Object value) {
-        if (value == null) {
-            return null;
-        }
-        var type = value.getClass();
-        var examiner = stone.getExaminer(type);
-        if (examiner != null) {
-            return examiner;  // Best scenario
-        }
+        if (valueExaminers != null) {
+            var examiner = valueExaminers.get(value);
 
-        if (value instanceof String || value instanceof Boolean || value instanceof Number || value instanceof Character) {
-            return null;
+            if (examiner != null) {
+                return examiner;
+            }
         }
+        if (testExaminers != null) {
+            for (var testExaminer : testExaminers) {
+                if (testExaminer.condition.test(value)) {
+                    return testExaminer.examiner;
+                }
+            }
+        }
+        return null;
+    }
 
-        return StandardExaminers.createExaminer(type, null);
+    private static class TestExaminer {
+        public final Predicate<Object> condition;
+        public final Examiner examiner;
+        private TestExaminer(Predicate<Object> condition, Examiner examiner) {
+            this.condition = condition;
+            this.examiner = examiner;
+        }
     }
 }
