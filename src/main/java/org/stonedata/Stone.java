@@ -14,7 +14,6 @@ import org.stonedata.coding.text.StoneTextEncoder;
 import org.stonedata.producers.Producer;
 import org.stonedata.producers.ProducerRepository;
 import org.stonedata.producers.ValueProducer;
-import org.stonedata.producers.impl.ClassObjectProducer;
 import org.stonedata.producers.impl.DefaultProducers;
 import org.stonedata.producers.impl.StandardProducerRepository;
 
@@ -22,7 +21,6 @@ import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -193,8 +191,7 @@ public class Stone {
             throw new MissingInputException();
         }
         var decoder = new StoneTextDecoder(repository);
-        var producer = new ClassObjectProducer(type);
-        var result = decoder.readObject(input, producer, null);
+        var result = decoder.read(input, type);
         return type.cast(result);
     }
 
@@ -227,9 +224,9 @@ public class Stone {
         var repository = getExaminerRepository();
         var encoder = new StoneTextEncoder(repository);
 
-        encoder.setSkipEncodingNullFields(skipEncodingNullFields);
+        encoder.setSkipNullFields(skipEncodingNullFields);
 
-        encoder.write(value, output);
+        encoder.write(output, value);
     }
 
     public boolean isSkipEncodingNullFields() {

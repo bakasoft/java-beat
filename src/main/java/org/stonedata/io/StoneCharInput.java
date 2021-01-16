@@ -1,5 +1,6 @@
 package org.stonedata.io;
 
+import org.stonedata.errors.InvalidSyntaxException;
 import org.stonedata.util.PP;
 
 import java.io.IOException;
@@ -9,8 +10,7 @@ public interface StoneCharInput {
     char pull() throws IOException;
     char peek() throws IOException;
 
-    int getLine();
-    int getColumn();
+    TextLocation getLocation();
 
     default boolean peek(char c) throws IOException{
         return peek() == c;
@@ -27,7 +27,7 @@ public interface StoneCharInput {
     default void expect(char expected) throws IOException {
         var actual = peek();
         if (actual != expected) {
-            throw new RuntimeException("Expected char " + PP.str(expected) + " instead of " + PP.str(actual) + " at " + getLine() + ":" + getColumn());
+            throw new InvalidSyntaxException(getLocation(), "Expected char " + PP.str(expected) + " instead of " + PP.str(actual) + ".");
         }
         pull();
     }

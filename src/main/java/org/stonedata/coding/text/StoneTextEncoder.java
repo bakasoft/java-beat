@@ -1,102 +1,165 @@
 package org.stonedata.coding.text;
 
+import org.stonedata.errors.CyclicDocumentException;
 import org.stonedata.examiners.ArrayExaminer;
+import org.stonedata.examiners.Examiner;
 import org.stonedata.examiners.ExaminerRepository;
 import org.stonedata.examiners.ObjectExaminer;
 import org.stonedata.examiners.ValueExaminer;
-import org.stonedata.references.StoneReferenceStore;
+import org.stonedata.references.ReferenceProvider;
 import org.stonedata.errors.StoneException;
 import org.stonedata.io.StoneCharOutput;
 import org.stonedata.coding.StoneCharEncoder;
-import org.stonedata.references.impl.StandardReferenceStore;
+import org.stonedata.references.impl.NullReferenceProvider;
 
 import java.io.IOException;
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.HashSet;
+import java.util.Set;
 
 public class StoneTextEncoder implements StoneCharEncoder {
 
-    private final StoneReferenceStore references;
+    private final ReferenceProvider references;
     private final ExaminerRepository examiners;
-    private boolean useStandardExaminers;
 
-    private boolean skipEncodingNullFields;
+    private boolean skipNullFields;
+
+    private final Deque<Object> stack;
 
     public StoneTextEncoder(ExaminerRepository examiners) {
-        this(examiners, new StandardReferenceStore());
+        this(examiners, NullReferenceProvider.INSTANCE);
     }
 
-    public StoneTextEncoder(ExaminerRepository examiners, StoneReferenceStore references) {
+    public StoneTextEncoder(ExaminerRepository examiners, ReferenceProvider references) {
         this.examiners = examiners;
         this.references = references;
-        this.useStandardExaminers = true;
+        this.stack = new ArrayDeque<>();
     }
 
-    public void write(Object value, StoneCharOutput output) throws IOException {
-        if (useStandardExaminers && tryWriteStandardValue(value, output)) {
-            return;
+    @Override
+    public void write(StoneCharOutput output, Object value) throws IOException {
+        write(output, new HashSet<>(), value);
+    }
+
+    public void write(StoneCharOutput output, Set<Object> writtenRefs, Object value) throws IOException {
+        var examiner = examiners.getExaminerFor(value);
+
+        if (examiner == null) {
+            var reference = references.getReference(value, null);
+
+            if (reference != null) {
+                writeStandardValueWithReference(output, writtenRefs, value, reference);
+            }
+            else {
+                writeStandardValue(output, value);
+            }
         }
+        else {
+            var typeName = examiner.getType();
+            var reference = references.getReference(value, typeName);
 
-        var examiner = examiners.findExaminer(value.getClass());
-        var type = examiner.getType();
-
-        if (type != null) {
-            var reference = references.getReference(type, value);
-            var onlyReference = (reference != null);
-
-            if (reference == null) {
-                reference = references.add(type, value);
+            if (typeName == null) {
+                if (reference == null) {
+                    writeExamined(output, writtenRefs, value, examiner);
+                }
+                else {
+                    writeExaminedWithReference(output, writtenRefs, value, examiner, reference);
+                }
             }
-
-            writeString(type, output);
-            output.write('<');
-            write(reference, output);
-            output.write('>');
-
-            if (onlyReference) {
-                return;
+            else if (reference == null) {
+                writeExaminedWithTypeName(output, writtenRefs, value, examiner, typeName);
             }
+            else {
+                writeExaminedWithTypeNameAndReference(output, writtenRefs, value, examiner, typeName, reference);
+            }
+        }
+    }
 
+    private void writeExaminedWithTypeNameAndReference(StoneCharOutput output, Set<Object> writtenRefs, Object value, Examiner examiner, String typeName, String reference) throws IOException {
+        writeString(output, typeName);
+        output.write('<');
+        writeString(output, reference);
+        output.write('>');
+        if (writtenRefs.add(reference + "\0" + typeName)) {
             output.space();
+            writeExamined(output, writtenRefs, value, examiner);
         }
+    }
+
+    private void writeExaminedWithTypeName(StoneCharOutput output, Set<Object> writtenRefs, Object value, Examiner examiner, String typeName) throws IOException {
+        writeString(output, typeName);
+        output.space();
+        writeExamined(output, writtenRefs, value, examiner);
+    }
+
+    private void writeExaminedWithReference(StoneCharOutput output, Set<Object> writtenRefs, Object value, Examiner examiner, String reference) throws IOException {
+        output.write('<');
+        writeString(output, reference);
+        output.write('>');
+        if (writtenRefs.add(reference + "\0")) {
+            output.space();
+            writeExamined(output, writtenRefs, value, examiner);
+        }
+    }
+
+    private void writeExamined(StoneCharOutput output, Set<Object> writtenRefs, Object value, Examiner examiner) throws IOException {
+        if (stack.contains(value)) {
+            throw new CyclicDocumentException(value, examiner);
+        }
+
+        stack.push(value);
 
         if (examiner instanceof ObjectExaminer) {
-            writeObject(value, (ObjectExaminer)examiner, output);
+            writeObject(output, writtenRefs, value, (ObjectExaminer) examiner);
         }
         else if (examiner instanceof ArrayExaminer) {
-            writeArray(value, (ArrayExaminer)examiner, output);
+            writeArray(output, writtenRefs, value, (ArrayExaminer) examiner);
         }
         else if (examiner instanceof ValueExaminer) {
-            writeValue(value, (ValueExaminer)examiner, output);
+            writeValue(output, writtenRefs, value, (ValueExaminer) examiner);
+        }
+        else {
+            throw new StoneException();
+        }
+
+        stack.pop();
+    }
+
+    private void writeStandardValueWithReference(StoneCharOutput output, Set<Object> writtenRefs, Object value, String reference) throws IOException {
+        output.write('<');
+        writeString(output, reference);
+        output.write('>');
+        if (writtenRefs.add(reference + "\0")) {
+            output.space();
+            output.write('(');
+            writeStandardValue(output, value);
+            output.write(')');
+        }
+    }
+
+    private void writeStandardValue(StoneCharOutput output, Object value) throws IOException {
+        if (value == null) {
+            writeNull(output);
+        }
+        else if (value instanceof String) {
+            writeString(output, (String)value);
+        }
+        else if (value instanceof Boolean) {
+            writeBoolean((Boolean)value, output);
+        }
+        else if (value instanceof Number) {
+            writeNumber((Number)value, output);
+        }
+        else if (value instanceof Character) {
+            writeChar((Character)value, output);
         }
         else {
             throw new StoneException();
         }
     }
 
-    private boolean tryWriteStandardValue(Object value, StoneCharOutput output) throws IOException {
-        if (value == null) {
-            writeNull(output);
-            return true;
-        }
-        else if (value instanceof String) {
-            writeString((String)value, output);
-            return true;
-        }
-        else if (value instanceof Boolean) {
-            writeBoolean((Boolean)value, output);
-            return true;
-        }
-        else if (value instanceof Number) {
-            writeNumber((Number)value, output);
-            return true;
-        }
-        else if (value instanceof Character) {
-            writeChar((Character)value, output);
-            return true;
-        }
-        return false;
-    }
-
-    private void writeObject(Object value, ObjectExaminer examiner, StoneCharOutput output) throws IOException {
+    private void writeObject(StoneCharOutput output, Set<Object> writtenRefs, Object value, ObjectExaminer examiner) throws IOException {
         var entryKeys = examiner.getKeys(value);
 
         if (entryKeys.isEmpty()) {
@@ -112,18 +175,18 @@ public class StoneTextEncoder implements StoneCharEncoder {
         for (var entryKey : entryKeys) {
             var entryValue = examiner.getValue(value, entryKey);
 
-            if (entryValue != null || !skipEncodingNullFields) {
+            if (entryValue != null || !skipNullFields) {
                 if (i > 0) {
                     output.write(',');
                     output.line();
                 }
 
-                writeString(entryKey, output);
+                writeString(output, entryKey);
 
                 output.write(':');
                 output.space();
 
-                write(entryValue, output);
+                write(output, writtenRefs, entryValue);
                 i++;
             }
         }
@@ -133,7 +196,7 @@ public class StoneTextEncoder implements StoneCharEncoder {
         output.write('}');
     }
 
-    private void writeArray(Object value, ArrayExaminer examiner, StoneCharOutput output) throws IOException {
+    private void writeArray(StoneCharOutput output, Set<Object> writtenRefs, Object value, ArrayExaminer examiner) throws IOException {
         var size = examiner.getSizeOf(value);
 
         if (size == 0) {
@@ -153,7 +216,7 @@ public class StoneTextEncoder implements StoneCharEncoder {
                 output.line();
             }
 
-            write(item, output);
+            write(output, writtenRefs, item);
         }
 
         output.indent(-1);
@@ -161,29 +224,24 @@ public class StoneTextEncoder implements StoneCharEncoder {
         output.write(']');
     }
 
-    private void writeValue(Object value, ValueExaminer examiner, StoneCharOutput output) throws IOException {
+    private void writeValue(StoneCharOutput output, Set<Object> writtenRefs, Object value, ValueExaminer examiner) throws IOException {
         var args = examiner.computeArguments(value);
 
-        if (args.size() == 1) {
-            write(args.get(0), output);
-        }
-        else {
-            output.write('(');
+        output.write('(');
 
-            for (var i = 0; i < args.size(); i++) {
-                if (i > 0) {
-                    output.write(',');
-                    output.space();
-                }
-
-                write(args.get(i), output);
+        for (var i = 0; i < args.size(); i++) {
+            if (i > 0) {
+                output.write(',');
+                output.space();
             }
 
-            output.write(')');
+            write(output, writtenRefs, args.get(i));
         }
-    }
 
-    private void writeChar(char value, StoneCharOutput output) throws IOException {
+        output.write(')');
+}
+
+    private static void writeChar(char value, StoneCharOutput output) throws IOException {
         output.write('"');
 
         writeUnquotedChar(value, output);
@@ -191,15 +249,15 @@ public class StoneTextEncoder implements StoneCharEncoder {
         output.write('"');
     }
 
-    private void writeNumber(Number value, StoneCharOutput output) throws IOException {
+    private static void writeNumber(Number value, StoneCharOutput output) throws IOException {
         output.write(String.valueOf(value));
     }
 
-    private void writeBoolean(boolean value, StoneCharOutput output) throws IOException {
+    private static void writeBoolean(boolean value, StoneCharOutput output) throws IOException {
         output.write(value ? "true" : "false");
     }
 
-    private void writeString(String value, StoneCharOutput output) throws IOException {
+    private static void writeString(StoneCharOutput output, String value) throws IOException {
         if (value.matches("[a-zA-Z0-9_./+-]+")) {
             output.write(value);
         }
@@ -218,7 +276,7 @@ public class StoneTextEncoder implements StoneCharEncoder {
         }
     }
 
-    private void writeNull(StoneCharOutput output) throws IOException {
+    private static void writeNull(StoneCharOutput output) throws IOException {
         output.write("null");
     }
 
@@ -227,18 +285,26 @@ public class StoneTextEncoder implements StoneCharEncoder {
             output.write('\\');
             output.write(chr);
         }
-        // TODO add escaping
+        else if (chr == '\t') {
+            output.write("\\t");
+        }
+        else if (chr == '\r') {
+            output.write("\\r");
+        }
+        else if (chr == '\n') {
+            output.write("\\n");
+        }
+        // TODO \\uHHHH
         else {
             output.write(chr);
         }
     }
 
-
-    public boolean isSkipEncodingNullFields() {
-        return skipEncodingNullFields;
+    public boolean isSkipNullFields() {
+        return skipNullFields;
     }
 
-    public void setSkipEncodingNullFields(boolean skipEncodingNullFields) {
-        this.skipEncodingNullFields = skipEncodingNullFields;
+    public void setSkipNullFields(boolean skipNullFields) {
+        this.skipNullFields = skipNullFields;
     }
 }

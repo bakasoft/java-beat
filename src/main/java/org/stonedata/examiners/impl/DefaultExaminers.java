@@ -2,7 +2,7 @@ package org.stonedata.examiners.impl;
 
 import org.stonedata.examiners.Examiner;
 import org.stonedata.examiners.ValueExaminer;
-import org.stonedata.util.GenericValue;
+import org.stonedata.types.GenericValue;
 
 import java.time.Duration;
 import java.util.Arrays;

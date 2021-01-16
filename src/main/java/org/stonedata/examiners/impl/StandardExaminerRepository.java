@@ -18,11 +18,18 @@ public class StandardExaminerRepository implements ExaminerRepository {
     }
 
     @Override
-    public Examiner findExaminer(Class<?> type) {
+    public Examiner getExaminerFor(Object value) {
+        if (value == null) {
+            return null;
+        }
+        var type = value.getClass();
         var examiner = stone.getExaminer(type);
-
         if (examiner != null) {
             return examiner;  // Best scenario
+        }
+
+        if (value instanceof String || value instanceof Boolean || value instanceof Number || value instanceof Character) {
+            return null;
         }
 
         return DefaultExaminers.createExaminer(type, null);

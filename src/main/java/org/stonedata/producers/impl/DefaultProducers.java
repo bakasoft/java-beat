@@ -24,7 +24,10 @@ public class DefaultProducers {
         if (typeHint instanceof Class) {
             var typeClass = (Class<?>) typeHint;
 
-            if (typeClass.isInterface()) {
+            if (Map.class.isAssignableFrom(typeClass)) {
+                return GenericObjectProducer.INSTANCE;
+            }
+            else if (typeClass.isInterface()) {
                 throw new RuntimeException("Cannot instantiate an interface: " + typeClass);
             }
 

@@ -1,12 +1,14 @@
 package org.stonedata.io.impl;
 
 import org.stonedata.io.StoneCharInput;
+import org.stonedata.io.TextLocation;
 
 import java.io.IOException;
 import java.io.Reader;
 
 public class ReaderInput implements StoneCharInput {
 
+    private final String resource;
     private final Reader reader;
 
     private Character buffer;
@@ -14,6 +16,11 @@ public class ReaderInput implements StoneCharInput {
     private int column;
 
     public ReaderInput(Reader reader) {
+        this(reader, null);
+    }
+
+    public ReaderInput(Reader reader, String resource) {
+        this.resource = resource;
         this.reader = reader;
     }
 
@@ -68,12 +75,8 @@ public class ReaderInput implements StoneCharInput {
     }
 
     @Override
-    public int getLine() {
-        return line;
+    public TextLocation getLocation() {
+        return new TextLocation(line, column, resource);
     }
 
-    @Override
-    public int getColumn() {
-        return column;
-    }
 }

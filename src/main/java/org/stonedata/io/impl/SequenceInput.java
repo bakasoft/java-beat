@@ -1,17 +1,24 @@
 package org.stonedata.io.impl;
 
 import org.stonedata.io.StoneCharInput;
+import org.stonedata.io.TextLocation;
 
 public class SequenceInput implements StoneCharInput {
 
     private final CharSequence sequence;
+    private final String resource;
 
     private int position;
     private int line;
     private int column;
 
     public SequenceInput(CharSequence sequence) {
+        this(sequence, null);
+    }
+
+    public SequenceInput(CharSequence sequence, String resource) {
         this.sequence = sequence;
+        this.resource = resource;
         this.position = 0;
     }
 
@@ -51,12 +58,8 @@ public class SequenceInput implements StoneCharInput {
     }
 
     @Override
-    public int getLine() {
-        return line + 1;
+    public TextLocation getLocation() {
+        return new TextLocation(line + 1, column + 1, resource);
     }
 
-    @Override
-    public int getColumn() {
-        return column + 1;
-    }
 }

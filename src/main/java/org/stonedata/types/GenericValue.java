@@ -1,4 +1,4 @@
-package org.stonedata.util;
+package org.stonedata.types;
 
 public class GenericValue {
 
