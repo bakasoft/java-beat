@@ -57,7 +57,7 @@ public class HardTypedListProducer<T> implements ArrayProducer {
     }
 
     @SuppressWarnings("unchecked")
-    private static void forcedAdd(List<?> list, Object item) {
+    public static void forcedAdd(List<?> list, Object item) {
         var unsafeList = (List<Object>)list;
 
         unsafeList.add(item);

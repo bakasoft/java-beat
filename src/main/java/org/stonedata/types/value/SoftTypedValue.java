@@ -2,16 +2,16 @@ package org.stonedata.types.value;
 
 public class SoftTypedValue {
 
-    private final String type;
+    private final String typeName;
     private final Object[] arguments;
 
-    public SoftTypedValue(String type, Object[] arguments) {
-        this.type = type;
+    public SoftTypedValue(String typeName, Object[] arguments) {
+        this.typeName = typeName;
         this.arguments = arguments;
     }
 
-    public String getType() {
-        return type;
+    public String getTypeName() {
+        return typeName;
     }
 
     public Object[] getArguments() {

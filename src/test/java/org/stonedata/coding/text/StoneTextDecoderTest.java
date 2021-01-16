@@ -4,9 +4,12 @@ import org.junit.jupiter.api.Test;
 import org.stonedata.Stone;
 import org.stonedata.errors.InvalidSyntaxException;
 import org.stonedata.errors.UnknownReferenceException;
+import org.stonedata.types.array.SoftTypedList;
+import org.stonedata.types.object.SoftTypedObject;
 import org.stonedata.types.value.EmptyValue;
 import org.stonedata.types.object.UntypedObject;
 import org.stonedata.types.array.UntypedList;
+import org.stonedata.types.value.SoftTypedValue;
 import org.stonedata.util.PP;
 
 import java.io.IOException;
@@ -14,6 +17,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -26,6 +30,10 @@ import static util.CustomAssertions.assertInstanceOf;
 
 class StoneTextDecoderTest {
 
+    public static class HardTypedObject {}
+
+    public static class HardTypedList extends ArrayList<Object> {}
+
     @Test
     void testEmptyObject() throws IOException {
         var stone = new Stone();
@@ -35,11 +43,49 @@ class StoneTextDecoderTest {
     }
 
     @Test
+    void testSoftTypedObject() throws IOException {
+        var stone = new Stone();
+        var result = (SoftTypedObject)stone.readText("SomeType {}");
+
+        assertEquals("SomeType", result.getTypeName());
+    }
+
+    @Test
+    void testHardTypedObject() throws IOException {
+        var stone = new Stone();
+
+        stone.registerObjectProducer(HardTypedObject.class);
+
+        var result = stone.readText("HardTypedObject {}");
+
+        assertInstanceOf(HardTypedObject.class, result);
+    }
+
+    @Test
     void testEmptyArray() throws IOException {
         var stone = new Stone();
         var result = stone.readText("[]");
 
         assertInstanceOf(UntypedList.class, result);
+    }
+
+    @Test
+    void testSoftTypedArray() throws IOException {
+        var stone = new Stone();
+        var result = (SoftTypedList)stone.readText("SomeType []");
+
+        assertEquals("SomeType", result.getTypeName());
+    }
+
+    @Test
+    void testHardTypedArray() throws IOException {
+        var stone = new Stone();
+
+        stone.registerArrayProducer(HardTypedList.class);
+
+        var result = stone.readText("HardTypedList []");
+
+        assertInstanceOf(HardTypedList.class, result);
     }
 
     @Test
@@ -88,6 +134,15 @@ class StoneTextDecoderTest {
         var result = stone.readText("12.34");
 
         assertEquals(new BigDecimal("12.34"), result);
+    }
+
+    @Test
+    void testSoftTypedValue() throws IOException {
+        var stone = new Stone();
+        var result = (SoftTypedValue)stone.readText("SomeValue()");
+
+        assertEquals("SomeType", result.getTypeName());
+        assertEquals(0, result.getArguments().length);
     }
 
     @Test

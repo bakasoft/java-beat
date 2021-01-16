@@ -20,8 +20,8 @@ class Sample2Test {
     void testSample2() throws IOException {
         var stone = new Stone();
         stone.setSkipEncodingNullFields(true);
-        stone.register(Document.class);
-        stone.register(Rectangle.class);
+        stone.registerObject(Document.class);
+        stone.registerObject(Rectangle.class);
         stone.registerValueProducer(Point.class, (x, y) -> {
             var point = new Point();
             point.setX(x.toString());

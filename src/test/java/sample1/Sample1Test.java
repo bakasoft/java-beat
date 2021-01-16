@@ -20,10 +20,10 @@ class Sample1Test {
     @Test
     void testSample1() throws IOException {
         var stone = new Stone();
-        stone.register(Button.class);
-        stone.register(Label.class);
-        stone.register(Panel.class);
-        stone.register(Text.class);
+        stone.registerObject(Button.class);
+        stone.registerObject(Label.class);
+        stone.registerObject(Panel.class);
+        stone.registerObject(Text.class);
 
         var text = TestUtils.loadString("/sample1.st");
         var result = stone.readText(text);

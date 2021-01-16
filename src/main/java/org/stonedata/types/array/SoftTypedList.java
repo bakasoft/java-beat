@@ -5,14 +5,14 @@ import java.util.Objects;
 
 public class SoftTypedList extends ArrayList<Object> {
 
-    private final String type;
+    private final String typeName;
 
-    public SoftTypedList(String type) {
-        this.type = type;
+    public SoftTypedList(String typeName) {
+        this.typeName = typeName;
     }
 
-    public String getType() {
-        return type;
+    public String getTypeName() {
+        return typeName;
     }
 
     @Override
@@ -21,11 +21,11 @@ public class SoftTypedList extends ArrayList<Object> {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         SoftTypedList objects = (SoftTypedList) o;
-        return Objects.equals(type, objects.type);
+        return Objects.equals(typeName, objects.typeName);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), type);
+        return Objects.hash(super.hashCode(), typeName);
     }
 }

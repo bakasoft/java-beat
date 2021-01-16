@@ -8,7 +8,7 @@ import org.stonedata.producers.ObjectProducer;
 import org.stonedata.repositories.ProducerRepository;
 import org.stonedata.producers.ValueProducer;
 import org.stonedata.producers.standard.array.SoftTypedListProducer;
-import org.stonedata.producers.standard.array.UntypedGenericListProducer;
+import org.stonedata.producers.standard.array.UntypedListProducer;
 import org.stonedata.producers.standard.object.SoftTypedObjectProducer;
 import org.stonedata.producers.standard.object.UntypedObjectProducer;
 import org.stonedata.producers.standard.value.SoftTypedValueProducer;
@@ -285,7 +285,7 @@ public class StoneTextDecoder implements StoneCharDecoder {
         else if (typeName != null) {
             return new SoftTypedListProducer(typeName);
         }
-        return UntypedGenericListProducer.INSTANCE;
+        return UntypedListProducer.INSTANCE;
     }
 
     private ValueProducer valueProducer(String typeName, Type typeHint) {

@@ -1,6 +1,7 @@
 package org.stonedata.producers.standard;
 
 import org.stonedata.producers.ArrayProducer;
+import org.stonedata.producers.standard.array.ClassListProducer;
 import org.stonedata.producers.standard.array.HardTypedListProducer;
 
 import java.lang.reflect.ParameterizedType;
@@ -24,6 +25,13 @@ public class StandardArrayProducers {
                     var itemType = (Class<?>)pArg0;
                     return new HardTypedListProducer(itemType);
                 }
+            }
+        }
+        else if (type instanceof Class) {
+            var typeClass = (Class<?>) type;
+
+            if (List.class.isAssignableFrom(typeClass)) {
+                return new ClassListProducer(typeClass);
             }
         }
 

@@ -3,6 +3,12 @@ package org.stonedata;
 import org.stonedata.coding.text.StoneTextDecoder;
 import org.stonedata.errors.MissingInputException;
 import org.stonedata.examiners.Examiner;
+import org.stonedata.producers.standard.StandardArrayProducers;
+import org.stonedata.producers.standard.StandardObjectProducers;
+import org.stonedata.producers.standard.StandardValueProducers;
+import org.stonedata.producers.standard.array.SoftTypedListProducer;
+import org.stonedata.producers.standard.object.SoftTypedObjectProducer;
+import org.stonedata.producers.standard.value.SoftTypedValueProducer;
 import org.stonedata.repositories.ExaminerRepository;
 import org.stonedata.examiners.ValueExaminer;
 import org.stonedata.examiners.standard.StandardExaminers;
@@ -16,6 +22,7 @@ import org.stonedata.repositories.ProducerRepository;
 import org.stonedata.producers.ValueProducer;
 import org.stonedata.producers.standard.StandardProducers;
 import org.stonedata.repositories.standard.StandardProducerRepository;
+import org.stonedata.types.array.SoftTypedList;
 
 import java.io.IOException;
 import java.util.LinkedHashMap;
@@ -35,14 +42,34 @@ public class Stone {
 
     public Stone() {}
 
-    public void register(Class<?> type) {
+    public void registerObject(Class<?> type) {
         registerExaminer(type);
-        registerProducer(type);
+        registerObjectProducer(type);
     }
 
-    public void register(Class<?> type, String name) {
+    public void registerObject(Class<?> type, String name) {
         registerExaminer(type, name);
-        registerProducer(type, name);
+        registerObjectProducer(type, name);
+    }
+
+    public void registerArray(Class<?> type) {
+        registerExaminer(type);
+        registerArrayProducer(type);
+    }
+
+    public void registerArray(Class<?> type, String name) {
+        registerExaminer(type, name);
+        registerArrayProducer(type, name);
+    }
+
+    public void registerValue(Class<?> type) {
+        registerExaminer(type);
+        registerValueProducer(type);
+    }
+
+    public void registerValue(Class<?> type, String name) {
+        registerExaminer(type, name);
+        registerValueProducer(type, name);
     }
 
     public Examiner getExaminer(Class<?> type) {
@@ -86,8 +113,16 @@ public class Stone {
         return producers.get(name);
     }
 
-    public void registerProducer(Class<?> type) {
-        registerProducer(type, type.getSimpleName());
+    public void registerObjectProducer(Class<?> type) {
+        registerObjectProducer(type, type.getSimpleName());
+    }
+
+    public void registerArrayProducer(Class<?> type) {
+        registerArrayProducer(type, type.getSimpleName());
+    }
+
+    public void registerValueProducer(Class<?> type) {
+        registerValueProducer(type, type.getSimpleName());
     }
 
     public <T> void registerValueProducer(Class<T> type, Function<Object, T> maker) {
@@ -130,8 +165,28 @@ public class Stone {
         });
     }
 
-    public void registerProducer(Class<?> type, String name) {
-        registerProducer(name, StandardProducers.create(type));
+    public void registerObjectProducer(Class<?> type, String name) {
+        var producer = StandardObjectProducers.tryCreate(type);
+        if (producer == null) {
+            producer = new SoftTypedObjectProducer(type.getSimpleName());
+        }
+        registerProducer(name, producer);
+    }
+
+    public void registerArrayProducer(Class<?> type, String name) {
+        var producer = StandardArrayProducers.tryCreate(type);
+        if (producer == null) {
+            producer = new SoftTypedListProducer(type.getSimpleName());
+        }
+        registerProducer(name, producer);
+    }
+
+    public void registerValueProducer(Class<?> type, String name) {
+        var producer = StandardValueProducers.tryCreate(type);
+        if (producer == null) {
+            producer = new SoftTypedValueProducer(type.getSimpleName());
+        }
+        registerProducer(name, producer);
     }
 
     public void registerProducer(String name, Producer producer) {

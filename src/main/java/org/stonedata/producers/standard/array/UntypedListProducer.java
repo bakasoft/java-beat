@@ -6,11 +6,11 @@ import org.stonedata.types.array.UntypedList;
 
 import java.lang.reflect.Type;
 
-public class UntypedGenericListProducer implements ArrayProducer {
+public class UntypedListProducer implements ArrayProducer {
 
-    public static final UntypedGenericListProducer INSTANCE = new UntypedGenericListProducer();
+    public static final UntypedListProducer INSTANCE = new UntypedListProducer();
 
-    private UntypedGenericListProducer() {}
+    private UntypedListProducer() {}
 
     @Override
     public Object beginInstance() {
