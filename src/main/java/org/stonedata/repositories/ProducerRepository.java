@@ -1,4 +1,8 @@
-package org.stonedata.producers;
+package org.stonedata.repositories;
+
+import org.stonedata.producers.ArrayProducer;
+import org.stonedata.producers.ObjectProducer;
+import org.stonedata.producers.ValueProducer;
 
 import java.lang.reflect.Type;
 

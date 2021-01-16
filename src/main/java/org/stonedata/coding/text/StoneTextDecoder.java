@@ -5,7 +5,7 @@ import org.stonedata.errors.InvalidSyntaxException;
 import org.stonedata.io.StoneCharInput;
 import org.stonedata.producers.ArrayProducer;
 import org.stonedata.producers.ObjectProducer;
-import org.stonedata.producers.ProducerRepository;
+import org.stonedata.repositories.ProducerRepository;
 import org.stonedata.producers.ValueProducer;
 import org.stonedata.producers.standard.array.SoftTypedListProducer;
 import org.stonedata.producers.standard.array.UntypedGenericListProducer;

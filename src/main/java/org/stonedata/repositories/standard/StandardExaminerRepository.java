@@ -1,8 +1,8 @@
-package org.stonedata.examiners.standard.repository;
+package org.stonedata.repositories.standard;
 
 import org.stonedata.Stone;
 import org.stonedata.examiners.Examiner;
-import org.stonedata.examiners.ExaminerRepository;
+import org.stonedata.repositories.ExaminerRepository;
 import org.stonedata.examiners.standard.StandardExaminers;
 
 public class StandardExaminerRepository implements ExaminerRepository {

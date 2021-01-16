@@ -1,10 +1,10 @@
-package org.stonedata.producers.standard.repository;
+package org.stonedata.repositories.standard;
 
 import org.stonedata.Stone;
 import org.stonedata.errors.ProducerNotFoundException;
 import org.stonedata.producers.ArrayProducer;
 import org.stonedata.producers.ObjectProducer;
-import org.stonedata.producers.ProducerRepository;
+import org.stonedata.repositories.ProducerRepository;
 import org.stonedata.producers.ValueProducer;
 import org.stonedata.producers.standard.StandardArrayProducers;
 import org.stonedata.producers.standard.StandardObjectProducers;

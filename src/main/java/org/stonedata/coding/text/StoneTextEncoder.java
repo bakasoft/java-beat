@@ -3,7 +3,7 @@ package org.stonedata.coding.text;
 import org.stonedata.errors.CyclicDocumentException;
 import org.stonedata.examiners.ArrayExaminer;
 import org.stonedata.examiners.Examiner;
-import org.stonedata.examiners.ExaminerRepository;
+import org.stonedata.repositories.ExaminerRepository;
 import org.stonedata.examiners.ObjectExaminer;
 import org.stonedata.examiners.ValueExaminer;
 import org.stonedata.references.ReferenceProvider;
