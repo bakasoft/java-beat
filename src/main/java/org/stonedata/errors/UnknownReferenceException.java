@@ -1,16 +1,15 @@
 package org.stonedata.errors;
 
-import org.stonedata.io.TextLocation;
 import org.stonedata.util.PP;
 
-public class UnknownReferenceException extends InvalidSyntaxException {
-    public UnknownReferenceException(TextLocation location, String type, Object reference) {
-        super(location, generateMessage(type, reference));
+public class UnknownReferenceException extends StoneException {
+    public UnknownReferenceException(String typeName, String reference) {
+        super(generateMessage(typeName, reference));
     }
 
-    private static String generateMessage(String type, Object reference) {
+    private static String generateMessage(String typeName, String reference) {
         return String.format("Unknown reference %s<%s>",
-                type != null ? type : "",
+                typeName != null ? typeName : "",
                 PP.str(reference));
     }
 }

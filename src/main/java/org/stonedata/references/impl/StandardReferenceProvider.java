@@ -4,7 +4,7 @@ import org.stonedata.references.ReferenceProvider;
 
 public class StandardReferenceProvider implements ReferenceProvider {
     @Override
-    public String getReference(Object value, String typeName) {
+    public String getReference(String typeName, Object value) {
         return null;
     }
 }

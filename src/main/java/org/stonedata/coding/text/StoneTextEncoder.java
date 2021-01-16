@@ -46,7 +46,7 @@ public class StoneTextEncoder implements StoneCharEncoder {
         var examiner = examiners.getExaminerFor(value);
 
         if (examiner == null) {
-            var reference = references.getReference(value, null);
+            var reference = references.getReference(null, value);
 
             if (reference != null) {
                 writeStandardValueWithReference(output, writtenRefs, value, reference);
@@ -57,7 +57,7 @@ public class StoneTextEncoder implements StoneCharEncoder {
         }
         else {
             var typeName = examiner.getType();
-            var reference = references.getReference(value, typeName);
+            var reference = references.getReference(typeName, value);
 
             if (typeName == null) {
                 if (reference == null) {

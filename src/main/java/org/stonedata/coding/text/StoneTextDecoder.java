@@ -2,11 +2,10 @@ package org.stonedata.coding.text;
 
 import org.stonedata.coding.StoneCharDecoder;
 import org.stonedata.errors.InvalidSyntaxException;
-import org.stonedata.errors.UnknownReferenceException;
 import org.stonedata.io.StoneCharInput;
 import org.stonedata.producers.ProducerRepository;
-import org.stonedata.references.StoneReferenceStore;
-import org.stonedata.references.impl.StandardReferenceStore;
+import org.stonedata.references.ReferenceTracker;
+import org.stonedata.references.impl.StandardReferenceTracker;
 import org.stonedata.util.PP;
 
 import java.io.IOException;
@@ -19,14 +18,14 @@ import java.util.regex.Pattern;
 
 public class StoneTextDecoder implements StoneCharDecoder {
 
-    private final StoneReferenceStore references;
+    private final ReferenceTracker references;
     private final ProducerRepository producers;
 
     public StoneTextDecoder(ProducerRepository producers) {
-        this(new StandardReferenceStore(), producers);
+        this(new StandardReferenceTracker(), producers);
     }
 
-    public StoneTextDecoder(StoneReferenceStore references, ProducerRepository producers) {
+    public StoneTextDecoder(ReferenceTracker references, ProducerRepository producers) {
         this.references = references;
         this.producers = producers;
     }
@@ -114,7 +113,7 @@ public class StoneTextDecoder implements StoneCharDecoder {
         return continueWithReference(input, typeHint, head, reference);
     }
 
-    private Object continueWithReference(StoneCharInput input, Type typeHint, String head, Object reference) throws IOException {
+    private Object continueWithReference(StoneCharInput input, Type typeHint, String head, String reference) throws IOException {
         var c = input.peek();
 
         if (c == '{') {
@@ -127,48 +126,45 @@ public class StoneTextDecoder implements StoneCharDecoder {
             return continueToValue(input, head, typeHint, reference);
         }
         else if (reference != null) {
-            if (!references.containsReference(head, reference)) {
-                throw new UnknownReferenceException(input.getLocation(), head, reference);
-            }
-            return references.getValue(head, reference);
+            return references.retrieve(head, reference);
         }
         else {
-            return continueWithLiteral(head, null, typeHint);
+            return continueWithLiteral(head, typeHint);
         }
     }
 
-    private Object continueToObject(StoneCharInput input, String typeName, Type typeHint, Object reference) throws IOException {
+    private Object continueToObject(StoneCharInput input, String typeName, Type typeHint, String reference) throws IOException {
         var value = readObject(input, typeName, typeHint);
 
         if (reference != null) {
-            references.set(typeName, value, reference);
+            references.store(typeName, value, reference);
         }
 
         return value;
     }
 
-    private Object continueToArray(StoneCharInput input, String typeName, Type typeHint, Object reference) throws IOException {
+    private Object continueToArray(StoneCharInput input, String typeName, Type typeHint, String reference) throws IOException {
         var value = readArray(input, typeName, typeHint);
 
         if (reference != null) {
-            references.set(typeName, value, reference);
+            references.store(typeName, value, reference);
         }
 
         return value;
     }
 
-    private Object continueToValue(StoneCharInput input, String typeName, Type typeHint, Object reference) throws IOException {
+    private Object continueToValue(StoneCharInput input, String typeName, Type typeHint, String reference) throws IOException {
         var value = readValue(input, typeName, typeHint);
 
         if (reference != null) {
-            references.set(typeName, value, reference);
+            references.store(typeName, value, reference);
         }
 
         return value;
     }
 
-    private Object continueWithLiteral(String literal, String typeName, Type typeHint) {
-        var producer = producers.findValueProducer(typeName, typeHint);
+    private Object continueWithLiteral(String literal, Type typeHint) {
+        var producer = producers.findValueProducer(null, typeHint);
 
         return producer.newInstance(List.of(literal));
     }

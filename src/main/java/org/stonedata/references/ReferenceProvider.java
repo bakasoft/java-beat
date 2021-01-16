@@ -2,6 +2,6 @@ package org.stonedata.references;
 
 public interface ReferenceProvider {
 
-    String getReference(Object value, String typeName);
+    String getReference(String typeName, Object value);
 
 }
