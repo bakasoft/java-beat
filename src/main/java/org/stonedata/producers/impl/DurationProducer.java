@@ -8,7 +8,7 @@ import java.util.List;
 
 public class DurationProducer implements ValueProducer {
     @Override
-    public Object newInstance(String type, List<?> arguments) {
+    public Object newInstance(List<?> arguments) {
         if (arguments.isEmpty()) {
             return 0;
         }

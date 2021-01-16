@@ -1,25 +1,25 @@
-Panel<1> {
-  layout: HORIZONTAL,
+Panel {
+  layout: (HORIZONTAL),
   elements: [
-    Label<1> {
+    Label {
       text: User
     },
-    Panel<2> {
-      layout: VERTICAL,
+    Panel {
+      layout: (VERTICAL),
       elements: [
-        Label<2> {
+        Label {
           text: Name
         },
-        Text<1> {
+        Text {
           value: dummy_value
         },
-        Label<3> {
+        Label {
           text: Email
         },
-        Text<2> {
+        Text {
           value: dummy_value
         },
-        Button<1> {
+        Button {
           text: Save
         }
       ]

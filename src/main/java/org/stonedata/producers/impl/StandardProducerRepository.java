@@ -18,87 +18,62 @@ public class StandardProducerRepository implements ProducerRepository {
     }
 
     @Override
-    public ObjectProducer findObjectProducer(String name, Type typeHint) {
-        if (name != null) {
-            var producer = stone.getProducer(name);
-
+    public ObjectProducer findObjectProducer(String typeName, Type typeHint) {
+        var producer = stone.getProducer(typeName);
+        if (producer != null) {
             if (producer instanceof ObjectProducer) {
                 return (ObjectProducer) producer;
-            }
-            else if (producer == null) {
-                throw new ProducerNotFoundException("object", name, typeHint);
             } else {
                 throw new ProducerNotFoundException(String.format(
-                        "Producer %s is not an object producer.", name));
-            }
-        }
-        else if (typeHint != null) {
-            var defaultProducer = DefaultProducers.tryCreateObjectProducer(typeHint);
-
-            if (defaultProducer != null) {
-                return defaultProducer;
+                        "Producer %s is not an object producer.", typeName));
             }
         }
 
-        return GenericObjectProducer.INSTANCE;
+        var standardProducer = StandardObjectProducers.create(typeHint, typeName);
+        if (typeName != null) {
+            stone.registerProducer(typeName, standardProducer);
+        }
+        return standardProducer;
     }
 
     @Override
-    public ArrayProducer findArrayProducer(String name, Type typeHint) {
-        var producer = stone.getProducer(name);
-
+    public ArrayProducer findArrayProducer(String typeName, Type typeHint) {
+        var producer = stone.getProducer(typeName);
         if (producer != null) {
             if (producer instanceof ArrayProducer) {
                 return (ArrayProducer) producer;
             }
             else {
                 throw new ProducerNotFoundException(String.format(
-                        "Producer %s is not an array producer.", name));
+                        "Producer %s is not an array producer.", typeName));
             }
         }
 
-        if (typeHint != null) {
-            var defaultProducer = DefaultProducers.tryCreateArrayProducer(typeHint);
-
-            if (defaultProducer != null) {
-                if (name != null) {
-                    stone.registerProducer(name, defaultProducer);
-                }
-
-                return defaultProducer;
-            }
+        var standardProducer = StandardArrayProducers.create(typeHint, typeName);
+        if (typeName != null) {
+            stone.registerProducer(typeName, standardProducer);
         }
-
-        return GenericListProducer.INSTANCE;
+        return standardProducer;
     }
 
     @Override
-    public ValueProducer findValueProducer(String name, Type typeHint) {
-        var producer = stone.getProducer(name);
-
+    public ValueProducer findValueProducer(String typeName, Type typeHint) {
+        var producer = stone.getProducer(typeName);
         if (producer != null) {
             if (producer instanceof ValueProducer) {
                 return (ValueProducer) producer;
             }
             else {
                 throw new ProducerNotFoundException(String.format(
-                        "Producer %s is not a value producer.", name));
+                        "Producer %s is not a value producer.", typeName));
             }
         }
 
-        if (typeHint != null) {
-            var defaultProducer = DefaultProducers.tryCreateValueProducer(typeHint);
-
-            if (defaultProducer != null) {
-                if (name != null) {
-                    stone.registerProducer(name, defaultProducer);
-                }
-
-                return defaultProducer;
-            }
+        var standardProducer = StandardValueProducers.create(typeHint, typeName);
+        if (typeName != null) {
+            stone.registerProducer(typeName, standardProducer);
         }
-
-        return GenericValueProducer.INSTANCE;
+        return standardProducer;
     }
 
 }

@@ -14,7 +14,7 @@ import org.stonedata.coding.text.StoneTextEncoder;
 import org.stonedata.producers.Producer;
 import org.stonedata.producers.ProducerRepository;
 import org.stonedata.producers.ValueProducer;
-import org.stonedata.producers.impl.DefaultProducers;
+import org.stonedata.producers.impl.StandardProducers;
 import org.stonedata.producers.impl.StandardProducerRepository;
 
 import java.io.IOException;
@@ -91,7 +91,7 @@ public class Stone {
     }
 
     public <T> void registerValueProducer(Class<T> type, Function<Object, T> maker) {
-        ValueProducer producer = (typeName, args) -> {
+        ValueProducer producer = (args) -> {
             if (args.size() != 1) {
                 throw new RuntimeException();
             }
@@ -103,7 +103,7 @@ public class Stone {
     }
 
     public <T> void registerValueProducer(Class<T> type, BiFunction<Object, Object, T> maker) {
-        ValueProducer producer = (typeName, args) -> {
+        ValueProducer producer = (args) -> {
             if (args.size() != 2) {
                 throw new RuntimeException();
             }
@@ -131,7 +131,7 @@ public class Stone {
     }
 
     public void registerProducer(Class<?> type, String name) {
-        registerProducer(name, DefaultProducers.createProducer(type));
+        registerProducer(name, StandardProducers.create(type));
     }
 
     public void registerProducer(String name, Producer producer) {

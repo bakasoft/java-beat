@@ -8,6 +8,8 @@ import org.stonedata.types.EmptyValue;
 import org.stonedata.types.GenericList;
 import org.stonedata.types.GenericObject;
 import org.stonedata.types.GenericValue;
+import org.stonedata.types.MapObject;
+import org.stonedata.types.UntypedList;
 import org.stonedata.util.PP;
 
 import java.io.IOException;
@@ -32,7 +34,7 @@ class StoneTextDecoderTest {
         var stone = new Stone();
         var result = stone.readText("{}");
 
-        assertInstanceOf(GenericObject.class, result);
+        assertInstanceOf(MapObject.class, result);
     }
 
     @Test
@@ -40,7 +42,7 @@ class StoneTextDecoderTest {
         var stone = new Stone();
         var result = stone.readText("[]");
 
-        assertInstanceOf(GenericList.class, result);
+        assertInstanceOf(UntypedList.class, result);
     }
 
     @Test
@@ -216,7 +218,7 @@ class StoneTextDecoderTest {
     void testArrayMultipleItems() throws IOException {
         var stone = new Stone();
         var text = "[null, true, false, 1, 0.5, 'abc', [], {}]";
-        var result = (GenericList)stone.readText(text);
+        var result = (UntypedList)stone.readText(text);
 
         assertNull(result.get(0));
         assertEquals(true, result.get(1));

@@ -96,7 +96,7 @@ public class ClassObjectProducer implements ObjectProducer {
     }
 
     @Override
-    public Object beginInstance(String typeName) {
+    public Object beginInstance() {
         return maker.get();
     }
 

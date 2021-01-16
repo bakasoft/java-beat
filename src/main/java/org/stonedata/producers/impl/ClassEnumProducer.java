@@ -23,7 +23,7 @@ public class ClassEnumProducer implements ValueProducer {
     }
 
     @Override
-    public Object newInstance(String type, List<?> arguments) {
+    public Object newInstance(List<?> arguments) {
         if (arguments.size() != 1) {
             throw new RuntimeException();
         }

@@ -7,16 +7,16 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TypedListProducer implements ArrayProducer {
+public class HardTypedListProducer implements ArrayProducer {
 
     private final Class<?> componentType;
 
-    public TypedListProducer(Class<?> componentType) {
+    public HardTypedListProducer(Class<?> componentType) {
         this.componentType = componentType;
     }
 
     @Override
-    public Object beginInstance(String type) {
+    public Object beginInstance() {
         return new ArrayList<>();
     }
 

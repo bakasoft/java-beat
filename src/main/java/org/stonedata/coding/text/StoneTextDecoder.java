@@ -118,13 +118,13 @@ public class StoneTextDecoder implements StoneCharDecoder {
         var c = input.peek();
 
         if (c == '{') {
-            return continueToObject(input, head, reference, typeHint);
+            return continueToObject(input, head, typeHint, reference);
         }
         else if (c == '[') {
-            return continueToArray(input, head, reference, typeHint);
+            return continueToArray(input, head, typeHint, reference);
         }
         else if (c == '(') {
-            return continueToValue(input, head, reference, typeHint);
+            return continueToValue(input, head, typeHint, reference);
         }
         else if (reference != null) {
             if (!references.containsReference(head, reference)) {
@@ -133,11 +133,11 @@ public class StoneTextDecoder implements StoneCharDecoder {
             return references.getValue(head, reference);
         }
         else {
-            return continueWithLiteral(head, typeHint);
+            return continueWithLiteral(head, null, typeHint);
         }
     }
 
-    private Object continueToObject(StoneCharInput input, String typeName, Object reference, Type typeHint) throws IOException {
+    private Object continueToObject(StoneCharInput input, String typeName, Type typeHint, Object reference) throws IOException {
         var value = readObject(input, typeName, typeHint);
 
         if (reference != null) {
@@ -147,7 +147,7 @@ public class StoneTextDecoder implements StoneCharDecoder {
         return value;
     }
 
-    private Object continueToArray(StoneCharInput input, String typeName, Object reference, Type typeHint) throws IOException {
+    private Object continueToArray(StoneCharInput input, String typeName, Type typeHint, Object reference) throws IOException {
         var value = readArray(input, typeName, typeHint);
 
         if (reference != null) {
@@ -157,7 +157,7 @@ public class StoneTextDecoder implements StoneCharDecoder {
         return value;
     }
 
-    private Object continueToValue(StoneCharInput input, String typeName, Object reference, Type typeHint) throws IOException {
+    private Object continueToValue(StoneCharInput input, String typeName, Type typeHint, Object reference) throws IOException {
         var value = readValue(input, typeName, typeHint);
 
         if (reference != null) {
@@ -167,19 +167,15 @@ public class StoneTextDecoder implements StoneCharDecoder {
         return value;
     }
 
-    private Object continueWithLiteral(String literal, Type typeHint) {
-        if (typeHint == null || typeHint == String.class) {
-            return literal;
-        }
+    private Object continueWithLiteral(String literal, String typeName, Type typeHint) {
+        var producer = producers.findValueProducer(typeName, typeHint);
 
-        var producer = producers.findValueProducer(null, typeHint);
-
-        return producer.newInstance(null, List.of(literal));
+        return producer.newInstance(List.of(literal));
     }
 
     private Object readObject(StoneCharInput input, String typeName, Type typeHint) throws IOException {
         var producer = producers.findObjectProducer(typeName, typeHint);
-        var obj = producer.beginInstance(typeName);
+        var obj = producer.beginInstance();
 
         input.expect('{');
 
@@ -212,10 +208,10 @@ public class StoneTextDecoder implements StoneCharDecoder {
         return producer.endInstance(obj);
     }
 
-    private Object readArray(StoneCharInput input, String type, Type typeHint) throws IOException {
-        var producer = producers.findArrayProducer(type, typeHint);
+    private Object readArray(StoneCharInput input, String typeName, Type typeHint) throws IOException {
+        var producer = producers.findArrayProducer(typeName, typeHint);
         var componentTypeHint = producer.getComponentTypeHint();
-        var arr = producer.beginInstance(type);
+        var arr = producer.beginInstance();
 
         input.expect('[');
 
@@ -239,8 +235,8 @@ public class StoneTextDecoder implements StoneCharDecoder {
         return producer.endInstance(arr);
     }
 
-    private Object readValue(StoneCharInput input, String type, Type typeHint) throws IOException {
-        var maker = producers.findValueProducer(type, typeHint);
+    private Object readValue(StoneCharInput input, String typeName, Type typeHint) throws IOException {
+        var maker = producers.findValueProducer(typeName, typeHint);
         var arguments = new ArrayList<>();
 
         input.expect('(');
@@ -262,7 +258,7 @@ public class StoneTextDecoder implements StoneCharDecoder {
 
         input.expect(')');
 
-        return maker.newInstance(type, arguments);
+        return maker.newInstance(arguments);
     }
 
     // STATIC
