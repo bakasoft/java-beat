@@ -9,9 +9,9 @@ import org.stonedata.repositories.ProducerRepository;
 import org.stonedata.producers.ValueProducer;
 import org.stonedata.producers.standard.array.SoftTypedListProducer;
 import org.stonedata.producers.standard.array.UntypedGenericListProducer;
-import org.stonedata.producers.standard.object.TypedGenericObjectProducer;
-import org.stonedata.producers.standard.object.UntypedGenericObjectProducer;
-import org.stonedata.producers.standard.value.TypedValueProducer;
+import org.stonedata.producers.standard.object.SoftTypedObjectProducer;
+import org.stonedata.producers.standard.object.UntypedObjectProducer;
+import org.stonedata.producers.standard.value.SoftTypedValueProducer;
 import org.stonedata.producers.standard.value.UntypedValueProducer;
 import org.stonedata.references.ReferenceTracker;
 import org.stonedata.references.impl.StandardReferenceTracker;
@@ -272,9 +272,9 @@ public class StoneTextDecoder implements StoneCharDecoder {
             return producer;
         }
         else if (typeName != null) {
-            return new TypedGenericObjectProducer(typeName);
+            return new SoftTypedObjectProducer(typeName);
         }
-        return UntypedGenericObjectProducer.INSTANCE;
+        return UntypedObjectProducer.INSTANCE;
     }
 
     private ArrayProducer arrayProducer(String typeName, Type typeHint) {
@@ -294,7 +294,7 @@ public class StoneTextDecoder implements StoneCharDecoder {
             return producer;
         }
         else if (typeName != null) {
-            return new TypedValueProducer(typeName);
+            return new SoftTypedValueProducer(typeName);
         }
         return UntypedValueProducer.INSTANCE;
     }

@@ -1,14 +1,14 @@
-package org.stonedata.types;
+package org.stonedata.types.object;
 
 import org.stonedata.errors.StoneException;
 
 import java.util.LinkedHashMap;
 
-public class GenericObject extends LinkedHashMap<String, Object> {
+public class SoftTypedObject extends LinkedHashMap<String, Object> {
 
     private final String type;
 
-    public GenericObject(String type) {
+    public SoftTypedObject(String type) {
         this.type = type;
     }
 

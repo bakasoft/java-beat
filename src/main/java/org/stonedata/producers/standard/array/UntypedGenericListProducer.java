@@ -2,7 +2,7 @@ package org.stonedata.producers.standard.array;
 
 import org.stonedata.errors.StoneException;
 import org.stonedata.producers.ArrayProducer;
-import org.stonedata.types.UntypedList;
+import org.stonedata.types.array.UntypedList;
 
 import java.lang.reflect.Type;
 

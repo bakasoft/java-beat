@@ -1,4 +1,4 @@
-package org.stonedata.types;
+package org.stonedata.types.array;
 
 import java.util.ArrayList;
 

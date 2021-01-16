@@ -1,11 +1,11 @@
-package org.stonedata.types;
+package org.stonedata.types.value;
 
-public class GenericValue {
+public class SoftTypedValue {
 
     private final String type;
     private final Object[] arguments;
 
-    public GenericValue(String type, Object[] arguments) {
+    public SoftTypedValue(String type, Object[] arguments) {
         this.type = type;
         this.arguments = arguments;
     }

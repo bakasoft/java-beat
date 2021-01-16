@@ -1,10 +1,10 @@
-package org.stonedata.types;
+package org.stonedata.types.object;
 
 import org.stonedata.errors.StoneException;
 
 import java.util.LinkedHashMap;
 
-public class MapObject extends LinkedHashMap<String, Object> {
+public class UntypedObject extends LinkedHashMap<String, Object> {
 
     public void set(String key, Object value) {
         if (containsKey(key)) {

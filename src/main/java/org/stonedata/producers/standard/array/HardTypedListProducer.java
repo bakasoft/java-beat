@@ -7,11 +7,11 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
-public class HardTypedListProducer implements ArrayProducer {
+public class HardTypedListProducer<T> implements ArrayProducer {
 
-    private final Class<?> componentType;
+    private final Class<T> componentType;
 
-    public HardTypedListProducer(Class<?> componentType) {
+    public HardTypedListProducer(Class<T> componentType) {
         this.componentType = componentType;
     }
 

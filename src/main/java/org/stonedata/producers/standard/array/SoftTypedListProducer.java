@@ -2,7 +2,7 @@ package org.stonedata.producers.standard.array;
 
 import org.stonedata.errors.StoneException;
 import org.stonedata.producers.ArrayProducer;
-import org.stonedata.types.GenericList;
+import org.stonedata.types.array.SoftTypedList;
 
 import java.lang.reflect.Type;
 
@@ -16,13 +16,13 @@ public class SoftTypedListProducer implements ArrayProducer {
 
     @Override
     public Object beginInstance() {
-        return new GenericList(type);
+        return new SoftTypedList(type);
     }
 
     @Override
     public void add(Object obj, Object item) {
-        if (obj instanceof GenericList) {
-            ((GenericList) obj).add(item);
+        if (obj instanceof SoftTypedList) {
+            ((SoftTypedList) obj).add(item);
         }
         else {
             throw new StoneException();

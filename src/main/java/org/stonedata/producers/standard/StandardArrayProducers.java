@@ -2,8 +2,6 @@ package org.stonedata.producers.standard;
 
 import org.stonedata.producers.ArrayProducer;
 import org.stonedata.producers.standard.array.HardTypedListProducer;
-import org.stonedata.producers.standard.array.SoftTypedListProducer;
-import org.stonedata.producers.standard.array.UntypedGenericListProducer;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;

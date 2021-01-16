@@ -8,7 +8,7 @@ import org.stonedata.examiners.standard.object.ClassObjectExaminer;
 import org.stonedata.examiners.standard.object.MapExaminer;
 import org.stonedata.examiners.standard.value.ClassEnumExaminer;
 import org.stonedata.examiners.standard.value.DurationExaminer;
-import org.stonedata.types.GenericValue;
+import org.stonedata.types.value.SoftTypedValue;
 
 import java.time.Duration;
 import java.util.Arrays;
@@ -33,11 +33,11 @@ public class StandardExaminers {
         else if (type == Duration.class) {
             return new DurationExaminer(name);
         }
-        else if (type == GenericValue.class) {
+        else if (type == SoftTypedValue.class) {
             return new ValueExaminer() {
                 @Override
                 public List<Object> computeArguments(Object value) {
-                    return Arrays.asList(((GenericValue)value).getArguments());
+                    return Arrays.asList(((SoftTypedValue)value).getArguments());
                 }
 
                 @Override

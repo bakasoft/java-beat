@@ -4,12 +4,9 @@ import org.junit.jupiter.api.Test;
 import org.stonedata.Stone;
 import org.stonedata.errors.InvalidSyntaxException;
 import org.stonedata.errors.UnknownReferenceException;
-import org.stonedata.types.EmptyValue;
-import org.stonedata.types.GenericList;
-import org.stonedata.types.GenericObject;
-import org.stonedata.types.GenericValue;
-import org.stonedata.types.MapObject;
-import org.stonedata.types.UntypedList;
+import org.stonedata.types.value.EmptyValue;
+import org.stonedata.types.object.UntypedObject;
+import org.stonedata.types.array.UntypedList;
 import org.stonedata.util.PP;
 
 import java.io.IOException;
@@ -34,7 +31,7 @@ class StoneTextDecoderTest {
         var stone = new Stone();
         var result = stone.readText("{}");
 
-        assertInstanceOf(MapObject.class, result);
+        assertInstanceOf(UntypedObject.class, result);
     }
 
     @Test
