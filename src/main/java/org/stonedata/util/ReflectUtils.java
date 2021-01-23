@@ -100,4 +100,14 @@ public class ReflectUtils {
         return type.isInstance(value)
                 || type == boolean.class && value instanceof Boolean;
     }
+
+    public static <T> Supplier<T> emptyConstructor(Class<T> type) {
+        return () -> {
+            try {
+                return type.getConstructor().newInstance();
+            } catch (InstantiationException | InvocationTargetException | NoSuchMethodException | IllegalAccessException e) {
+                throw new RuntimeException();
+            }
+        };
+    }
 }

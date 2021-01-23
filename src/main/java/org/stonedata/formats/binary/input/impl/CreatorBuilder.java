@@ -5,7 +5,7 @@ import org.stonedata.formats.binary.input.Value;
 import org.stonedata.formats.binary.schema.IndexedField;
 import org.stonedata.formats.binary.schema.impl.DefaultIndexedField;
 import org.stonedata.formats.binary.schema.impl.DefaultIndexedType;
-import org.stonedata.util.ReflectionUtils;
+import org.stonedata.util.ReflectUtils;
 
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
@@ -44,7 +44,7 @@ public class CreatorBuilder<T> {
 
     public ObjectCreator build() {
         if (product.getInstantiator() == null) {
-            product.setInstantiator(ReflectionUtils.emptyConstructor(product.getTypeClass()));
+            product.setInstantiator(ReflectUtils.emptyConstructor(product.getTypeClass()));
         }
         return product;
     }
