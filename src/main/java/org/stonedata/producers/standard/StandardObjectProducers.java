@@ -14,11 +14,11 @@ import java.util.Map;
 public class StandardObjectProducers {
     private StandardObjectProducers() {}
 
-    public static ObjectProducer create(Type typeHint) {
-        return create(null, typeHint, false);
+    public static ObjectProducer create(Type type, String name) {
+        return create(type, name, false);
     }
 
-    public static ObjectProducer create(String typeName, Type typeHint, boolean useCleanDefaultTypes) {
+    public static ObjectProducer create(Type typeHint, String typeName, boolean useCleanDefaultTypes) {
         if (typeHint instanceof Class) {
             var typeClass = (Class<?>) typeHint;
 

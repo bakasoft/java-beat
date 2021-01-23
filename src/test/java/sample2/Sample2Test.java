@@ -22,16 +22,17 @@ class Sample2Test {
     @Test
     void testSample2() throws IOException {
         var stone = Stone.builder()
-                .skipEncodingNullFields(true)
+                .skipNullFields(true)
                 .withObject(Document.class)
                 .withObject(Rectangle.class)
-                .withProducer(ValueProducer.of((x, y) -> {
-                    var point = new Point();
-                    point.setX(x.toString());
-                    point.setY(y.toString());
-                    return point;
-                }), Point.class)
-                .withExaminer(Examiners.value(Point.class, (p -> List.of(p.getX(), p.getY()))), Point.class)
+                .withProducer(Point.class, ValueProducer.of((x, y) -> {
+                        var point = new Point();
+                        point.setX(x.toString());
+                        point.setY(y.toString());
+                        return point;
+                }))
+                .withExaminer(Examiners.value(Point.class, (p ->
+                        List.of(p.getX(), p.getY()))), Point.class)
                 .build();
 
         var text = TestUtils.loadString("/sample2.st");

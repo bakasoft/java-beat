@@ -18,7 +18,7 @@ class Sample0Test {
     @Test
     void testSample0() throws IOException {
         var stone = Stone.builder()
-                .withValue(Duration.class, new DurationExaminer(), new DurationProducer())
+                .withType(Duration.class, new DurationExaminer(), new DurationProducer())
                 .build();
         var text = TestUtils.loadString("/sample0.st");
         var result = stone.readText(text, Release.class);

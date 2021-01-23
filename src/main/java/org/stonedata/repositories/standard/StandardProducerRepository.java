@@ -55,7 +55,7 @@ public class StandardProducerRepository implements ProducerRepository {
         }
     }
 
-    public void register(String name, Producer producer) {
+    public StandardProducerRepository register(String name, Producer producer) {
         Objects.requireNonNull(producer);
         Objects.requireNonNull(name);
         if (nameProducers == null) {
@@ -65,9 +65,10 @@ public class StandardProducerRepository implements ProducerRepository {
             throw new RuntimeException();
         }
         nameProducers.put(name, producer);
+        return this;
     }
 
-    public void register(Type type, Producer producer) {
+    public StandardProducerRepository register(Type type, Producer producer) {
         Objects.requireNonNull(producer);
         Objects.requireNonNull(type);
         if (typeProducers == null) {
@@ -77,6 +78,7 @@ public class StandardProducerRepository implements ProducerRepository {
             throw new RuntimeException();
         }
         typeProducers.put(type, producer);
+        return this;
     }
 
     public boolean contains(String name) {

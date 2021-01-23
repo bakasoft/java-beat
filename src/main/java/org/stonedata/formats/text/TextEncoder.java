@@ -4,6 +4,7 @@ import org.stonedata.errors.CyclicDocumentException;
 import org.stonedata.errors.UnsupportedValueException;
 import org.stonedata.examiners.ArrayExaminer;
 import org.stonedata.examiners.Examiner;
+import org.stonedata.examiners.standard.StandardExaminers;
 import org.stonedata.examiners.standard.array.ArrayInstanceExaminer;
 import org.stonedata.examiners.standard.array.ListExaminer;
 import org.stonedata.examiners.standard.object.ClassObjectExaminer;
@@ -107,7 +108,6 @@ public class TextEncoder {
     }
 
     private Examiner searchExaminer(Object value) {
-        // #1: Search in repository
         if (examiners != null) {
             var examiner = examiners.getExaminer(value);
 
@@ -115,54 +115,7 @@ public class TextEncoder {
                 return examiner;
             }
         }
-
-        // TODO: Move to a module?
-
-        // #2: Search by instance
-        if (value == null
-                || value instanceof String
-                || value instanceof Boolean
-                || value instanceof Number
-                || value instanceof Character) {
-            return ValueIdentityExaminer.INSTANCE;
-        }
-        else if (value instanceof DefaultTypedObject) {
-            var typeName = ((DefaultTypedObject)value).getTypeName();
-            if (typeName == null) {
-                return MapExaminer.ANONYMOUS_INSTANCE;
-            }
-            return new MapExaminer(typeName);
-        }
-        else if (value instanceof DefaultTypedList) {
-            var typeName = ((DefaultTypedList)value).getTypeName();
-            if (typeName == null) {
-                return ListExaminer.ANONYMOUS_INSTANCE;
-            }
-            return new ListExaminer(typeName);
-        }
-        else if (value instanceof DefaultTypedValue) {
-            var typeName = ((DefaultTypedValue)value).getTypeName();
-            if (typeName == null) {
-                return ValueIdentityExaminer.INSTANCE;
-            }
-            return new DefaultTypedValueExaminer(typeName);
-        }
-        else if (value instanceof Map) {
-            return MapExaminer.ANONYMOUS_INSTANCE;
-        }
-        else if (value instanceof List) {
-            return ListExaminer.ANONYMOUS_INSTANCE;
-        }
-
-        // #3: Search by type
-        var typeClass = value.getClass();
-        if (typeClass.isArray()) {
-            return ArrayInstanceExaminer.ANONYMOUS_INSTANCE;
-        }
-        else if (typeClass.isEnum()) {
-            return new ClassEnumExaminer(typeClass, null);
-        }
-        return new ClassObjectExaminer(typeClass, null);
+        return StandardExaminers.create(value);
     }
 
     private void writeContent(CharOutput output, Set<Object> writtenRefs, Object value, Examiner examiner, boolean wrap) {

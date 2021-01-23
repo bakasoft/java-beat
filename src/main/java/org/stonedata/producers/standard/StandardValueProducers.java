@@ -12,11 +12,11 @@ import java.lang.reflect.Type;
 public class StandardValueProducers {
     private StandardValueProducers() {}
 
-    public static ValueProducer create(Type typeHint) {
-        return create(null, typeHint, false);
+    public static ValueProducer create(Type type, String name) {
+        return create(type, name, false);
     }
 
-    public static ValueProducer create(String typeName, Type typeHint, boolean useCleanDefaultTypes) {
+    public static ValueProducer create(Type typeHint, String typeName, boolean useCleanDefaultTypes) {
         if (typeHint instanceof Class) {
             var typeClass = (Class<?>)typeHint;
 

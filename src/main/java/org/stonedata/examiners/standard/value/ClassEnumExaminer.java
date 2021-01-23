@@ -2,8 +2,6 @@ package org.stonedata.examiners.standard.value;
 
 import org.stonedata.examiners.ValueExaminer;
 
-import java.util.List;
-
 public class ClassEnumExaminer implements ValueExaminer {
     private final Class<?> type;
     private final String typeName;

@@ -1,5 +1,7 @@
 package org.stonedata.examiners;
 
+import org.stonedata.util.ReflectUtils;
+
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
@@ -7,7 +9,7 @@ import java.util.function.UnaryOperator;
 public class Examiners {
 
     public static <T> ValueExaminer value(Class<T> type, Function<T, Object> fn) {
-        return value(type, type.getSimpleName(), fn);
+        return value(type, ReflectUtils.computeDefaultTypeName(type), fn);
     }
 
     public static <T> ValueExaminer value(Class<T> type, String typeName, Function<T, Object> fn) {

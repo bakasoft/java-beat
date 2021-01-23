@@ -262,7 +262,7 @@ public class TextDecoder {
             }
         }
 
-        return StandardObjectProducers.create(typeName, typeHint, useCleanDefaultTypes);
+        return StandardObjectProducers.create(typeHint, typeName, useCleanDefaultTypes);
     }
 
     private ArrayProducer searchArrayProducer(String typeName, Type typeHint) {
@@ -284,7 +284,7 @@ public class TextDecoder {
             }
         }
 
-        return StandardArrayProducers.create(typeName, typeHint, useCleanDefaultTypes);
+        return StandardArrayProducers.create(typeHint, typeName, useCleanDefaultTypes);
     }
 
     private ValueProducer searchValueProducer(String typeName, Type typeHint) {
@@ -304,7 +304,7 @@ public class TextDecoder {
             }
         }
 
-        return StandardValueProducers.create(typeName, typeHint, useCleanDefaultTypes);
+        return StandardValueProducers.create(typeHint, typeName, useCleanDefaultTypes);
     }
 
     private Object store(String reference, Object value) {

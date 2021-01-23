@@ -1,269 +1,157 @@
 package org.stonedata;
 
+import org.stonedata.errors.StoneException;
 import org.stonedata.examiners.Examiner;
-import org.stonedata.examiners.standard.object.ClassObjectExaminer;
+import org.stonedata.examiners.standard.StandardExaminers;
 import org.stonedata.producers.Producer;
-import org.stonedata.producers.standard.object.ClassObjectProducer;
+import org.stonedata.producers.standard.StandardArrayProducers;
+import org.stonedata.producers.standard.StandardObjectProducers;
+import org.stonedata.producers.standard.StandardValueProducers;
 import org.stonedata.repositories.standard.StandardExaminerRepository;
 import org.stonedata.repositories.standard.StandardProducerRepository;
 import org.stonedata.util.ReflectUtils;
 
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 
 public class StoneBuilder {
 
-    private final List<StoneEntry> entries;
+    private StandardProducerRepository producers;
+    private StandardExaminerRepository examiners;
 
     private boolean skipNullFieldsValue;
     private boolean useCleanDefaultTypesValue;
 
-    public StoneBuilder() {
-        entries = new ArrayList<>();
-    }
-
     public StoneBuilder withObject(Class<?> type) {
-        return withObject(type, type.getSimpleName());
+        return withObject(type, ReflectUtils.computeDefaultTypeName(type));
     }
 
     public StoneBuilder withObject(Class<?> type, String name) {
-        entries.add(new ObjectTypeEntry(type, name));
-        return this;
+        return withType(type, name,
+                StandardExaminers.createObject(type, name),
+                StandardObjectProducers.create(type, name));
     }
 
     public StoneBuilder withArray(Class<?> type) {
-        return withArray(type, type.getSimpleName());
+        return withArray(type, ReflectUtils.computeDefaultTypeName(type));
     }
 
     public StoneBuilder withArray(Class<?> type, String name) {
-        entries.add(new ArrayTypeEntry(type, name));
-        return this;
+        return withType(type, name,
+                StandardExaminers.createArray(type, name),
+                StandardArrayProducers.create(type, name));
     }
 
     public StoneBuilder withValue(Class<?> type) {
-        return withValue(type, ReflectUtils.computeDefaultTypeName(type), null, null);
-    }
-
-    public StoneBuilder withValue(Class<?> type, Examiner examiner, Producer producer) {
-        return withValue(type, ReflectUtils.computeDefaultTypeName(type), examiner, producer);
+        return withValue(type,
+                ReflectUtils.computeDefaultTypeName(type));
     }
 
     public StoneBuilder withValue(Class<?> type, String name) {
-        return withValue(type, name, null, null);
+        return withType(type, name,
+                StandardExaminers.createValue(type, name),
+                StandardValueProducers.create(type, name));
     }
 
-    public StoneBuilder withValue(Class<?> type, String name, Examiner examiner, Producer producer) {
-        entries.add(new ValueTypeEntry(type, name));
-        entries.add(new ExaminerForType(examiner, type));
-        entries.add(new ProducerForType(producer, type));
-        entries.add(new ProducerForName(producer, name));
+    public StoneBuilder withType(Class<?> type, Examiner examiner) {
+        return withType(type,
+                ReflectUtils.computeDefaultTypeName(type),
+                examiner, null);
+    }
+
+    public StoneBuilder withType(Class<?> type, Examiner examiner, Producer producer) {
+        return withType(type,
+                ReflectUtils.computeDefaultTypeName(type),
+                examiner, producer);
+    }
+
+    public StoneBuilder withType(Class<?> type, Producer producer) {
+        return withType(type,
+                ReflectUtils.computeDefaultTypeName(type),
+                null, producer);
+    }
+
+    public StoneBuilder withType(Class<?> type, String name, Producer producer) {
+        return withType(type, name, null, producer);
+    }
+
+    public StoneBuilder withType(Class<?> type, String name, Examiner examiner, Producer producer) {
+        if (producer == null && examiner == null) {
+            throw new StoneException("Missing examiner or producer");
+        }
+
+        if (producer != null) {
+            getProducers()
+                    .register(name, producer)
+                    .register(type, producer);
+        }
+
+        if (examiner != null) {
+            getExaminers().register(examiner, type);
+        }
+
         return this;
     }
 
     public StoneBuilder withExaminer(Examiner examiner, Predicate<Object> condition) {
-        entries.add(new ExaminerForCondition(examiner, condition));
+        getExaminers().register(examiner, condition);
         return this;
     }
 
     public StoneBuilder withExaminer(Examiner examiner, Class<?> type) {
-        entries.add(new ExaminerForType(examiner, type));
+        getExaminers().register(examiner, type);
         return this;
     }
 
-    public StoneBuilder withProducer(Producer producer, BiPredicate<String, Type> condition) {
-        entries.add(new ProducerForCondition(producer, condition));
+    public StoneBuilder withProducer(String name, Producer producer) {
+        getProducers().register(name, producer);
         return this;
     }
 
-    public StoneBuilder withProducer(Producer producer, String name) {
-        entries.add(new ProducerForName(producer, name));
+    public StoneBuilder withProducer(Type type, Producer producer) {
+        return withProducer(type,
+                ReflectUtils.computeDefaultTypeName(type),
+                producer);
+    }
+
+    public StoneBuilder withProducer(Type type, String name, Producer producer) {
+        getProducers()
+                .register(name, producer)
+                .register(type, producer);
         return this;
     }
 
-    public StoneBuilder withProducer(Producer producer, Type type) {
-        entries.add(new ProducerForType(producer, type));
-        return this;
-    }
-
-    public StoneBuilder skipEncodingNullFields(boolean value) {
+    public StoneBuilder skipNullFields(boolean value) {
         skipNullFieldsValue = value;
         return this;
     }
 
-    public Stone buildEncoder() {
-        return build(true, false);
+    public StoneBuilder useCleanDefaultTypes(boolean value) {
+        useCleanDefaultTypesValue = value;
+        return this;
     }
 
-    public Stone buildDecoder() {
-        return build(false, true);
+    private StandardProducerRepository getProducers() {
+        if (producers == null) {
+            producers = new StandardProducerRepository();
+        }
+        return producers;
+    }
+
+    private StandardExaminerRepository getExaminers() {
+        if (examiners == null) {
+            examiners = new StandardExaminerRepository();
+        }
+        return examiners;
     }
 
     public Stone build() {
-        return build(true, true);
-    }
-
-    public Stone build(boolean encoder, boolean decoder) {
-        var producerRepository = encoder ? new StandardProducerRepository() : null;
-        var examinerRepository = decoder ? new StandardExaminerRepository() : null;
-
-        for (var entry : entries) {
-            entry.build(producerRepository, examinerRepository);
-        }
-
         var stone = new Stone();
-        stone.setExaminerRepository(examinerRepository);
-        stone.setProducerRepository(producerRepository);
+        stone.setExaminerRepository(examiners);
+        stone.setProducerRepository(producers);
         stone.setSkipNullFields(skipNullFieldsValue);
         stone.setUseCleanDefaultTypes(useCleanDefaultTypesValue);
         return stone;
-    }
-
-    private interface StoneEntry {
-        void build(StandardProducerRepository producerRepository, StandardExaminerRepository examinerRepository);
-    }
-
-    private static class ObjectTypeEntry implements StoneEntry {
-        final Class<?> type;
-        final String name;
-
-        ObjectTypeEntry(Class<?> type, String name) {
-            this.type = Objects.requireNonNull(type);
-            this.name = Objects.requireNonNull(name);
-        }
-
-        @Override
-        public void build(StandardProducerRepository producerRepository, StandardExaminerRepository examinerRepository) {
-            if (producerRepository != null) {
-                var producer = new ClassObjectProducer(type);
-
-                producerRepository.register(name, producer);
-                producerRepository.register(type, producer);
-            }
-
-            if (examinerRepository != null) {
-                var examiner = new ClassObjectExaminer(type, name);
-
-                examinerRepository.register(examiner, type);
-            }
-        }
-    }
-
-    private static class ArrayTypeEntry implements StoneEntry {
-        final Class<?> type;
-        final String name;
-
-        ArrayTypeEntry(Class<?> type, String name) {
-            this.type = type;
-            this.name = name;
-        }
-
-        @Override
-        public void build(StandardProducerRepository producerRepository, StandardExaminerRepository examinerRepository) {
-
-        }
-    }
-
-    private static class ValueTypeEntry implements StoneEntry {
-        final Class<?> type;
-        final String name;
-
-        ValueTypeEntry(Class<?> type, String name) {
-            this.type = type;
-            this.name = name;
-        }
-
-        @Override
-        public void build(StandardProducerRepository producerRepository, StandardExaminerRepository examinerRepository) {
-
-        }
-    }
-
-    private static class ExaminerForCondition implements StoneEntry {
-        final Examiner examiner;
-        final Predicate<Object> condition;
-
-        ExaminerForCondition(Examiner examiner, Predicate<Object> condition) {
-            this.examiner = examiner;
-            this.condition = condition;
-        }
-
-        @Override
-        public void build(StandardProducerRepository producerRepository, StandardExaminerRepository examinerRepository) {
-
-        }
-    }
-
-    private static class ExaminerForType implements StoneEntry {
-        final Examiner examiner;
-        final Class<?> type;
-
-        ExaminerForType(Examiner examiner, Class<?> type) {
-            this.examiner = examiner;
-            this.type = type;
-        }
-
-        @Override
-        public void build(StandardProducerRepository producerRepository, StandardExaminerRepository examinerRepository) {
-            if (examinerRepository != null) {
-                examinerRepository.register(examiner, type);
-            }
-        }
-    }
-
-    private static class ProducerForCondition implements StoneEntry {
-        final Producer producer;
-        final BiPredicate<String, Type> condition;
-
-        private ProducerForCondition(Producer producer, BiPredicate<String, Type> condition) {
-            this.producer = producer;
-            this.condition = condition;
-        }
-
-        @Override
-        public void build(StandardProducerRepository producerRepository, StandardExaminerRepository examinerRepository) {
-
-        }
-    }
-
-    private static class ProducerForName implements StoneEntry {
-        final Producer producer;
-        final String name;
-
-        private ProducerForName(Producer producer, String name) {
-            this.producer = producer;
-            this.name = name;
-        }
-
-        @Override
-        public void build(StandardProducerRepository producerRepository, StandardExaminerRepository examinerRepository) {
-
-        }
-    }
-
-    private static class ProducerForType implements StoneEntry {
-        final Producer producer;
-        final Type type;
-
-        private ProducerForType(Producer producer, Type type) {
-            this.producer = producer;
-            this.type = type;
-        }
-
-        @Override
-        public void build(StandardProducerRepository producerRepository, StandardExaminerRepository examinerRepository) {
-            if (producerRepository != null) {
-                producerRepository.register(type, producer);
-
-                var name = ReflectUtils.computeDefaultTypeName(type);
-                if (!producerRepository.contains(name)) {
-                    producerRepository.register(name, producer);
-                }
-            }
-        }
     }
 
 }

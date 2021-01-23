@@ -15,11 +15,11 @@ public class StandardArrayProducers {
 
     private StandardArrayProducers() {}
 
-    public static ArrayProducer create(Type typeHint) {
-        return create(null, typeHint, false);
+    public static ArrayProducer create(Type type, String name) {
+        return create(type, name, false);
     }
 
-    public static ArrayProducer create(String typeName, Type typeHint, boolean useCleanDefaultTypes) {
+    public static ArrayProducer create(Type typeHint, String typeName, boolean useCleanDefaultTypes) {
         if (typeHint instanceof ParameterizedType) {
             var pType = (ParameterizedType)typeHint;
             var pArgs = pType.getActualTypeArguments();
