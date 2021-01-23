@@ -2,8 +2,8 @@ package org.stonedata.producers.standard.object;
 
 import org.stonedata.errors.DuplicateKeyException;
 import org.stonedata.producers.ObjectProducer;
-import org.stonedata.types.object.DefaultObject;
-import org.stonedata.types.object.DefaultObjectImpl;
+import org.stonedata.types.DefaultObject;
+import org.stonedata.types.standard.DefaultObjectImpl;
 import org.stonedata.util.PP;
 
 import java.lang.reflect.Type;

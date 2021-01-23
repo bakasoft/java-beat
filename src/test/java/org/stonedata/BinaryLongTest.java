@@ -1,7 +1,7 @@
 package org.stonedata;
 
 import org.junit.jupiter.api.Test;
-import org.stonedata.coding.binary.translate.INT64;
+import org.stonedata.formats.binary.translate.INT64;
 import util.TestUtils;
 
 import java.io.ByteArrayInputStream;

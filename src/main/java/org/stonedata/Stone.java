@@ -1,12 +1,12 @@
 package org.stonedata;
 
-import org.stonedata.coding.text.StoneTextDecoder;
+import org.stonedata.formats.text.TextDecoder;
 import org.stonedata.errors.MissingInputException;
 import org.stonedata.references.impl.NullReferenceProvider;
-import org.stonedata.io.StoneCharInput;
-import org.stonedata.io.StoneCharOutput;
-import org.stonedata.io.impl.*;
-import org.stonedata.coding.text.StoneTextEncoder;
+import org.stonedata.io.CharInput;
+import org.stonedata.io.CharOutput;
+import org.stonedata.io.standard.*;
+import org.stonedata.formats.text.TextEncoder;
 import org.stonedata.references.impl.DefaultReferenceTracker;
 import org.stonedata.repositories.ExaminerRepository;
 import org.stonedata.repositories.ProducerRepository;
@@ -29,19 +29,19 @@ public class Stone {
         return readText(new SequenceInput(text), type);
     }
 
-    public <T> T readText(StoneCharInput input, Class<T> type) throws IOException {
+    public <T> T readText(CharInput input, Class<T> type) throws IOException {
         if (producerRepository == null) {
             throw new RuntimeException();
         }
         return readText(input, type, producerRepository);
     }
 
-    public static <T> T readText(StoneCharInput input, Class<T> type, ProducerRepository repository) throws IOException {
+    public static <T> T readText(CharInput input, Class<T> type, ProducerRepository repository) throws IOException {
         if (input == null) {
             throw new MissingInputException();
         }
         var references = new DefaultReferenceTracker();
-        var decoder = new StoneTextDecoder(repository, references);
+        var decoder = new TextDecoder(repository, references);
         var result = decoder.read(input, type);
         return type.cast(result);
     }
@@ -50,19 +50,19 @@ public class Stone {
         return readText(new SequenceInput(input));
     }
 
-    public Object readText(StoneCharInput input) throws IOException {
+    public Object readText(CharInput input) throws IOException {
         if (producerRepository == null) {
             throw new RuntimeException();
         }
         return readText(input, producerRepository);
     }
 
-    public static Object readText(StoneCharInput input, ProducerRepository repository) throws IOException {
+    public static Object readText(CharInput input, ProducerRepository repository) throws IOException {
         if (input == null) {
             throw new MissingInputException();
         }
         var references = new DefaultReferenceTracker();
-        var decoder = new StoneTextDecoder(repository, references);
+        var decoder = new TextDecoder(repository, references);
         return decoder.read(input);
     }
 
@@ -74,11 +74,11 @@ public class Stone {
         writeText(value, prettyPrint ? new PrettyPrintOutput(appendable) : new AppendableOutput(appendable));
     }
 
-    public void writeText(Object value, StoneCharOutput output) throws IOException {
+    public void writeText(Object value, CharOutput output) throws IOException {
         if (examinerRepository == null) {
             throw new RuntimeException();
         }
-        var encoder = new StoneTextEncoder(examinerRepository, NullReferenceProvider.INSTANCE);
+        var encoder = new TextEncoder(examinerRepository, NullReferenceProvider.INSTANCE);
 
         encoder.setSkipNullFields(skipEncodingNullFields);
 

@@ -1,7 +1,7 @@
 package org.stonedata.producers.standard.value;
 
 import org.stonedata.producers.ValueProducer;
-import org.stonedata.types.value.DefaultValueImpl;
+import org.stonedata.types.standard.DefaultValueImpl;
 
 import java.util.List;
 

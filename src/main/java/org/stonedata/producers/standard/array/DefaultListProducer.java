@@ -1,8 +1,8 @@
 package org.stonedata.producers.standard.array;
 
 import org.stonedata.producers.ArrayProducer;
-import org.stonedata.types.array.DefaultList;
-import org.stonedata.types.array.DefaultListImpl;
+import org.stonedata.types.DefaultList;
+import org.stonedata.types.standard.DefaultListImpl;
 
 import java.lang.reflect.Type;
 
