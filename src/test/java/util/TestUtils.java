@@ -7,13 +7,10 @@ import java.io.InputStreamReader;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Formatter;
-import java.util.Objects;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TestUtils {
 
-    public static void assertSameOutput(Stone stone, Object result, String text) throws IOException {
+    public static void assertSameOutput(Stone stone, Object result, String text) {
         var buffer = new StringBuilder();
 
         stone.writeText(result, buffer, true);

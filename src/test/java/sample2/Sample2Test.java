@@ -3,7 +3,6 @@ package sample2;
 import org.junit.jupiter.api.Test;
 import org.stonedata.Stone;
 import org.stonedata.examiners.Examiners;
-import org.stonedata.examiners.ValueExaminer;
 import org.stonedata.producers.ValueProducer;
 import sample2.types.Document;
 import sample2.types.Point;

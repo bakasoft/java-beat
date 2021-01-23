@@ -19,7 +19,8 @@ public class StoneBuilder {
 
     private final List<StoneEntry> entries;
 
-    private boolean skipEncodingNullFieldsValue;
+    private boolean skipNullFieldsValue;
+    private boolean useCleanDefaultTypesValue;
 
     public StoneBuilder() {
         entries = new ArrayList<>();
@@ -89,7 +90,7 @@ public class StoneBuilder {
     }
 
     public StoneBuilder skipEncodingNullFields(boolean value) {
-        skipEncodingNullFieldsValue = value;
+        skipNullFieldsValue = value;
         return this;
     }
 
@@ -113,7 +114,12 @@ public class StoneBuilder {
             entry.build(producerRepository, examinerRepository);
         }
 
-        return new Stone(producerRepository, examinerRepository, skipEncodingNullFieldsValue);
+        var stone = new Stone();
+        stone.setExaminerRepository(examinerRepository);
+        stone.setProducerRepository(producerRepository);
+        stone.setSkipNullFields(skipNullFieldsValue);
+        stone.setUseCleanDefaultTypes(useCleanDefaultTypesValue);
+        return stone;
     }
 
     private interface StoneEntry {

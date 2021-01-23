@@ -234,7 +234,7 @@ class TextEncoderTest {
         mapWithNull.put("b", null);
         mapWithNull.put("c", 2);
 
-        assertTrue(encoder.isSkipNullFields());
+        assertTrue(encoder.getSkipNullFields());
         assertEquals("{a:1,c:2}", encoder.write(mapWithNull));
     }
 

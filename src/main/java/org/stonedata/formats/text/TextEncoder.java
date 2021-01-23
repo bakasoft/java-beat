@@ -56,7 +56,7 @@ public class TextEncoder {
         this.cycleStack = new ArrayDeque<>();
     }
 
-    public boolean isSkipNullFields() {
+    public boolean getSkipNullFields() {
         return skipNullFields;
     }
 
