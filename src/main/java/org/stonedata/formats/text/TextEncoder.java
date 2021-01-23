@@ -5,29 +5,18 @@ import org.stonedata.errors.UnsupportedValueException;
 import org.stonedata.examiners.ArrayExaminer;
 import org.stonedata.examiners.Examiner;
 import org.stonedata.examiners.standard.StandardExaminers;
-import org.stonedata.examiners.standard.array.ArrayInstanceExaminer;
-import org.stonedata.examiners.standard.array.ListExaminer;
-import org.stonedata.examiners.standard.object.ClassObjectExaminer;
-import org.stonedata.examiners.standard.object.MapExaminer;
-import org.stonedata.examiners.standard.value.ClassEnumExaminer;
-import org.stonedata.examiners.standard.value.DefaultTypedValueExaminer;
-import org.stonedata.examiners.standard.value.ValueIdentityExaminer;
 import org.stonedata.io.standard.AppendableOutput;
 import org.stonedata.repositories.ExaminerRepository;
 import org.stonedata.examiners.ObjectExaminer;
 import org.stonedata.examiners.ValueExaminer;
 import org.stonedata.references.ReferenceProvider;
 import org.stonedata.io.CharOutput;
-import org.stonedata.types.DefaultTypedList;
-import org.stonedata.types.DefaultTypedObject;
-import org.stonedata.types.DefaultTypedValue;
 import org.stonedata.util.PP;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 public class TextEncoder {
@@ -82,7 +71,7 @@ public class TextEncoder {
         var reference = references != null ? references.getReference(value) : null;
         if (reference == null) {
             var examiner = searchExaminer(value);
-            var typeName = examiner.getType();
+            var typeName = examiner.getTypeName();
             if (typeName == null) {
                 writeContent(output, writtenRefs, value, examiner, false);
             }
@@ -94,7 +83,7 @@ public class TextEncoder {
         }
         else if (writtenRefs.add(reference)) {
             var examiner = searchExaminer(value);
-            var typeName = examiner.getType();
+            var typeName = examiner.getTypeName();
             if (typeName != null) {
                 writeString(output, typeName);
             }

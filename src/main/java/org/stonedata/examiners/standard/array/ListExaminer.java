@@ -29,7 +29,7 @@ public class ListExaminer implements ArrayExaminer {
     }
 
     @Override
-    public String getType() {
+    public String getTypeName() {
         return type;
     }
 }

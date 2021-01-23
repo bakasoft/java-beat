@@ -3,7 +3,6 @@ package org.stonedata.examiners.standard.value;
 import org.stonedata.examiners.ValueExaminer;
 
 import java.time.Duration;
-import java.util.List;
 
 public class DurationExaminer implements ValueExaminer {
 
@@ -20,7 +19,7 @@ public class DurationExaminer implements ValueExaminer {
     }
 
     @Override
-    public String getType() {
+    public String getTypeName() {
         return type;
     }
 

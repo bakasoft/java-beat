@@ -7,7 +7,9 @@ import java.time.Duration;
 
 public class DurationProducer implements ValueProducer {
 
-    // TODO make it singleton
+    public static final DurationProducer INSTANCE = new DurationProducer();
+
+    private DurationProducer() {}
 
     @Override
     public Object newInstance(Object[] arguments) {

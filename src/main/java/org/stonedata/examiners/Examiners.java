@@ -1,12 +1,15 @@
 package org.stonedata.examiners;
 
+import org.stonedata.errors.UnsupportedValueException;
+import org.stonedata.util.PP;
 import org.stonedata.util.ReflectUtils;
 
-import java.util.List;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
 public class Examiners {
+
+    public Examiners() {}
 
     public static <T> ValueExaminer value(Class<T> type, Function<T, Object> fn) {
         return value(type, ReflectUtils.computeDefaultTypeName(type), fn);
@@ -20,12 +23,12 @@ public class Examiners {
                     return fn.apply(type.cast(value));
                 }
                 else {
-                    throw new RuntimeException();
+                    throw new UnsupportedValueException(PP.type(type), PP.str(value));
                 }
             }
 
             @Override
-            public String getType() {
+            public String getTypeName() {
                 return typeName;
             }
         };
@@ -43,7 +46,7 @@ public class Examiners {
             }
 
             @Override
-            public String getType() {
+            public String getTypeName() {
                 return typeName;
             }
         };

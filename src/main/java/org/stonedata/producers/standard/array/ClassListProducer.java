@@ -1,6 +1,5 @@
 package org.stonedata.producers.standard.array;
 
-import org.stonedata.errors.StoneException;
 import org.stonedata.producers.ArrayProducer;
 import org.stonedata.util.ReflectUtils;
 

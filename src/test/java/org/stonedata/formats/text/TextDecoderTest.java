@@ -104,7 +104,7 @@ class TextDecoderTest {
     void testReadValueCustomProducerByName() {
         var repository = new StandardProducerRepository();
         var decoder = new TextDecoder(repository);
-        repository.register("D", new DurationProducer());
+        repository.register("D", DurationProducer.INSTANCE);
 
         var result = decoder.read("D(PT1S)");
 
@@ -116,7 +116,7 @@ class TextDecoderTest {
     void testReadValueCustomProducerByHint() {
         var repository = new StandardProducerRepository();
         var decoder = new TextDecoder(repository);
-        repository.register(Duration.class, new DurationProducer());
+        repository.register(Duration.class, DurationProducer.INSTANCE);
 
         var result = decoder.read("PT1S", Duration.class);
 

@@ -85,7 +85,7 @@ public class ClassObjectExaminer implements ObjectExaminer {
     }
 
     @Override
-    public String getType() {
+    public String getTypeName() {
         return typeName;
     }
 }

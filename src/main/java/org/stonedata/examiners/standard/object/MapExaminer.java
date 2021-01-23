@@ -22,7 +22,7 @@ public class MapExaminer implements ObjectExaminer {
     }
 
     @Override
-    public String getType() {
+    public String getTypeName() {
         return type;
     }
 

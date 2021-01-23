@@ -25,7 +25,7 @@ public class ArrayInstanceExaminer implements ArrayExaminer {
     }
 
     @Override
-    public String getType() {
+    public String getTypeName() {
         return typeName;
     }
 }

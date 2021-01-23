@@ -11,7 +11,7 @@ public class DefaultTypedValueExaminer implements ValueExaminer {
     }
 
     @Override
-    public String getType() {
+    public String getTypeName() {
         return typeName;
     }
 

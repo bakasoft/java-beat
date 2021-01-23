@@ -1,14 +1,19 @@
 package org.stonedata.producers.standard.value;
 
+import org.stonedata.errors.UnsupportedValueException;
 import org.stonedata.producers.ValueProducer;
+import org.stonedata.util.PP;
+import org.stonedata.util.Validations;
 
-import java.util.List;
 import java.util.Objects;
 
 public class ClassEnumProducer implements ValueProducer {
+    private final Class<?> enumType;
     private final Enum<?>[] enumConstants;
 
     public ClassEnumProducer(Class<?> enumType) {
+        Validations.requireAssignableFrom(Enum.class, enumType);
+        this.enumType = enumType;
         this.enumConstants = extractConstants(enumType);
     }
 
@@ -19,13 +24,19 @@ public class ClassEnumProducer implements ValueProducer {
             }
         }
 
-        throw new RuntimeException("enum value not found: " + name);
+        throw new UnsupportedValueException(String.format(
+                "Value %s was not found in Enum %s.",
+                PP.str(name), PP.type(enumType)
+        ));
     }
 
     @Override
     public Object newInstance(Object[] arguments) {
         if (arguments.length != 1) {
-            throw new RuntimeException();
+            throw new UnsupportedValueException(String.format(
+                    "Expected only one argument instead of %s.",
+                    PP.str(arguments)
+            ));
         }
 
         var arg = arguments[0];
@@ -34,7 +45,10 @@ public class ClassEnumProducer implements ValueProducer {
             return findByName((String)arg);
         }
         else {
-            throw new RuntimeException();
+            throw new UnsupportedValueException(String.format(
+                    "Expected a string value instead of %s.",
+                    PP.str(arg)
+            ));
         }
     }
 

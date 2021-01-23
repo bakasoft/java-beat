@@ -1,5 +1,7 @@
 package org.stonedata.producers;
 
+import org.stonedata.errors.StoneException;
+
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -13,7 +15,7 @@ public interface ValueProducer extends Producer {
                 return fn.apply(args[0]);
             }
             else {
-                throw new RuntimeException();
+                throw new StoneException("Unexpected number of arguments: " + args.length);
             }
         };
     }
@@ -24,7 +26,7 @@ public interface ValueProducer extends Producer {
                 return fn.apply(args[0], args[1]);
             }
             else {
-                throw new RuntimeException();
+                throw new StoneException("Unexpected number of arguments: " + args.length);
             }
         };
     }

@@ -16,9 +16,9 @@ import java.time.Duration;
 class Sample0Test {
 
     @Test
-    void testSample0() throws IOException {
+    void testSample0() {
         var stone = Stone.builder()
-                .withType(Duration.class, new DurationExaminer(), new DurationProducer())
+                .withType(Duration.class, DurationExaminer.ANONYMOUS_INSTANCE, DurationProducer.INSTANCE)
                 .build();
         var text = TestUtils.loadString("/sample0.st");
         var result = stone.readText(text, Release.class);

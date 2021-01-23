@@ -9,7 +9,7 @@ public class ValueIdentityExaminer implements ValueExaminer {
     private ValueIdentityExaminer() {}
 
     @Override
-    public String getType() {
+    public String getTypeName() {
         return null;
     }
 

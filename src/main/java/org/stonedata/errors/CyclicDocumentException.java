@@ -14,7 +14,7 @@ public class CyclicDocumentException extends StoneException {
     }
 
     private static String generateMessage(Object value, Examiner examiner) {
-        var examinerType = examiner.getType() != null ? PP.str(examiner.getType()) : PP.typeOf(examiner);
+        var examinerType = examiner.getTypeName() != null ? PP.str(examiner.getTypeName()) : PP.typeOf(examiner);
         var valueType = PP.typeOf(value);
 
 
