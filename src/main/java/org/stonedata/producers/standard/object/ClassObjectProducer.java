@@ -14,14 +14,14 @@ import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
-public class HardTypedObjectProducer implements ObjectProducer {
+public class ClassObjectProducer implements ObjectProducer {
 
     private final Class<?> type;
     private final Supplier<Object> maker;
     private final Map<String, BiConsumer<Object, Object>> setters;
     private final Map<String, Type> typeHints;
 
-    public HardTypedObjectProducer(Class<?> type) {
+    public ClassObjectProducer(Class<?> type) {
         this.type = type;
         this.typeHints = new HashMap<>();
         this.setters = generateSetters(type, typeHints);

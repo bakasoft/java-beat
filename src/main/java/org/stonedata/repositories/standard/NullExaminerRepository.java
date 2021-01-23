@@ -10,7 +10,7 @@ public class NullExaminerRepository implements ExaminerRepository {
     private NullExaminerRepository() {}
 
     @Override
-    public Examiner getExaminerFor(Object value) {
+    public Examiner getExaminer(Object value) {
         return null;
     }
 }

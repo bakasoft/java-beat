@@ -4,16 +4,19 @@ import org.stonedata.errors.StoneException;
 import org.stonedata.producers.ValueProducer;
 
 import java.time.Duration;
-import java.util.List;
 
 public class DurationProducer implements ValueProducer {
+
+    // TODO make it singleton
+
     @Override
-    public Object newInstance(List<?> arguments) {
-        if (arguments.isEmpty()) {
+    public Object newInstance(Object[] arguments) {
+        if (arguments.length == 0) {
             return 0;
         }
-        else if (arguments.size() == 1) {
-            var value = String.valueOf(arguments.get(0));
+        else if (arguments.length == 1) {
+            var value = String.valueOf(arguments[0]);
+
             return Duration.parse(value);
         }
         else {

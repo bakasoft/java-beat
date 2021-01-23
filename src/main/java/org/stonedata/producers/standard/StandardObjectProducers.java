@@ -1,8 +1,12 @@
 package org.stonedata.producers.standard;
 
 import org.stonedata.producers.ObjectProducer;
-import org.stonedata.producers.standard.object.HardTypedObjectProducer;
-import org.stonedata.producers.standard.object.UntypedObjectProducer;
+import org.stonedata.producers.standard.object.ClassObjectProducer;
+import org.stonedata.producers.standard.object.DefaultObjectProducer;
+import org.stonedata.producers.standard.object.DefaultTypedObjectProducer;
+import org.stonedata.producers.standard.object.ClassMapProducer;
+import org.stonedata.producers.standard.object.MapObjectProducer;
+import org.stonedata.util.ReflectUtils;
 
 import java.lang.reflect.Type;
 import java.util.Map;
@@ -10,20 +14,29 @@ import java.util.Map;
 public class StandardObjectProducers {
     private StandardObjectProducers() {}
 
-    public static ObjectProducer tryCreate(Type typeHint) {
+    public static ObjectProducer create(Type typeHint) {
+        return create(null, typeHint, false);
+    }
+
+    public static ObjectProducer create(String typeName, Type typeHint, boolean useCleanDefaultTypes) {
         if (typeHint instanceof Class) {
             var typeClass = (Class<?>) typeHint;
 
             if (Map.class.isAssignableFrom(typeClass)) {
-                return UntypedObjectProducer.INSTANCE;
-            }
-            else if (typeClass.isInterface()) {
-                throw new RuntimeException("Cannot instantiate an interface: " + typeClass);
+                if (ReflectUtils.canInstantiate(typeClass)) {
+                    return new ClassMapProducer(typeClass);
+                }
+                return MapObjectProducer.INSTANCE;
             }
 
-            return new HardTypedObjectProducer(typeClass);
+            if (ReflectUtils.canInstantiate(typeClass)) {
+                return new ClassObjectProducer(typeClass);
+            }
         }
 
-        return null;
+        if (typeName == null || useCleanDefaultTypes) {
+            return DefaultObjectProducer.INSTANCE;
+        }
+        return new DefaultTypedObjectProducer(typeName);
     }
 }

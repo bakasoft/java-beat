@@ -13,11 +13,15 @@ import java.util.function.Function;
 public class ClassObjectExaminer implements ObjectExaminer {
 
     private final Map<String, Function<Object, Object>> attributes;
-    private final String name;
+    private final String typeName;
 
-    public ClassObjectExaminer(Class<?> type, String name) {
+    public ClassObjectExaminer(Class<?> type) {
+        this(type, null);
+    }
+
+    public ClassObjectExaminer(Class<?> type, String typeName) {
         this.attributes = generateAttributes(type);
-        this.name = name;
+        this.typeName = typeName;
     }
 
     public static Map<String, Function<Object, Object>> generateAttributes(Class<?> type) {
@@ -82,6 +86,6 @@ public class ClassObjectExaminer implements ObjectExaminer {
 
     @Override
     public String getType() {
-        return name;
+        return typeName;
     }
 }

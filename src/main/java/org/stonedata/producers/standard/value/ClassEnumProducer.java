@@ -23,12 +23,12 @@ public class ClassEnumProducer implements ValueProducer {
     }
 
     @Override
-    public Object newInstance(List<?> arguments) {
-        if (arguments.size() != 1) {
+    public Object newInstance(Object[] arguments) {
+        if (arguments.length != 1) {
             throw new RuntimeException();
         }
 
-        var arg = arguments.get(0);
+        var arg = arguments[0];
 
         if (arg instanceof String) {
             return findByName((String)arg);

@@ -1,7 +1,9 @@
 package org.stonedata.producers.standard.array;
 
 import org.stonedata.errors.StoneException;
+import org.stonedata.errors.UnsupportedValueException;
 import org.stonedata.producers.ArrayProducer;
+import org.stonedata.util.PP;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -33,7 +35,8 @@ public class HardTypedListProducer<T> implements ArrayProducer {
             forcedAdd(list, item);
         }
         else {
-            throw new StoneException();
+            throw new UnsupportedValueException(
+                    String.format("Expected an instance of %s instead of %s.", PP.type(componentType), PP.typeOf(item)));
         }
     }
 

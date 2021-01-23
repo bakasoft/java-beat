@@ -1,224 +1,254 @@
 package org.stonedata.coding.text;
 
 import org.junit.jupiter.api.Test;
-import org.stonedata.Stone;
+import org.stonedata.errors.DuplicateKeyException;
 import org.stonedata.errors.InvalidSyntaxException;
 import org.stonedata.errors.UnknownReferenceException;
-import org.stonedata.types.array.SoftTypedList;
-import org.stonedata.types.object.SoftTypedObject;
-import org.stonedata.types.value.EmptyValue;
-import org.stonedata.types.object.UntypedObject;
-import org.stonedata.types.array.UntypedList;
-import org.stonedata.types.value.SoftTypedValue;
+import org.stonedata.io.impl.SequenceInput;
+import org.stonedata.producers.ValueProducer;
+import org.stonedata.producers.standard.array.ClassListProducer;
+import org.stonedata.producers.standard.object.ClassObjectProducer;
+import org.stonedata.producers.standard.object.MapObjectProducer;
+import org.stonedata.producers.standard.value.DurationProducer;
+import org.stonedata.references.impl.DefaultReferenceTracker;
+import org.stonedata.repositories.ProducerRepository;
+import org.stonedata.repositories.standard.NullProducerRepository;
+import org.stonedata.repositories.standard.StandardProducerRepository;
+import org.stonedata.types.array.DefaultTypedList;
+import org.stonedata.types.object.DefaultTypedObject;
+import org.stonedata.types.object.DefaultObject;
+import org.stonedata.types.array.DefaultList;
+import org.stonedata.types.value.DefaultTypedValue;
+import org.stonedata.types.value.DefaultValue;
 import org.stonedata.util.PP;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static util.CustomAssertions.assertException;
 import static util.CustomAssertions.assertInstanceOf;
+import static util.CustomAssertions.assertNotInstanceOf;
 
 class StoneTextDecoderTest {
 
-    public static class HardTypedObject {}
+    public static class Message {
+        public String content;
+    }
 
-    public static class HardTypedList extends ArrayList<Object> {}
+    public static class StringList extends ArrayList<String> {}
 
     @Test
-    void testEmptyObject() throws IOException {
-        var stone = new Stone();
-        var result = stone.readText("{}");
+    void testGetReference() {
+        var references = new DefaultReferenceTracker();
+        var value = new Object();
+        references.store("1", value);
 
-        assertInstanceOf(UntypedObject.class, result);
+        var decoder = new StoneTextDecoder(references);
+        var result = decoder.read("<1>");
+
+        assertSame(value, result);
     }
 
     @Test
-    void testSoftTypedObject() throws IOException {
-        var stone = new Stone();
-        var result = (SoftTypedObject)stone.readText("SomeType {}");
+    void testPutReference() {
+        var references = new DefaultReferenceTracker();
+        var decoder = new StoneTextDecoder(references);
+        var obj = decoder.read("<1>{}");
+        var arr = decoder.read("<2>[]");
+        var val = decoder.read("<3>()");
 
-        assertEquals("SomeType", result.getTypeName());
+        assertInstanceOf(DefaultObject.class, references.retrieve("1"));
+        assertInstanceOf(DefaultList.class, references.retrieve("2"));
+        assertInstanceOf(DefaultValue.class, references.retrieve("3"));
     }
 
     @Test
-    void testHardTypedObject() throws IOException {
-        var stone = new Stone();
+    void testReadLiteralValue() {
+        var decoder = new StoneTextDecoder();
 
-        stone.registerObjectProducer(HardTypedObject.class);
-
-        var result = stone.readText("HardTypedObject {}");
-
-        assertInstanceOf(HardTypedObject.class, result);
+        assertNull(decoder.read("null"));
+        assertTrue(decoder.read("true", Boolean.class));
+        assertFalse(decoder.read("false", Boolean.class));
+        assertEquals("abc", decoder.read("\"abc\""));
+        assertEquals("abc", decoder.read("abc"));
+        assertInstanceOf(Number.class, decoder.read("0"));
+        assertInstanceOf(Number.class, decoder.read("0.5"));
     }
 
     @Test
-    void testEmptyArray() throws IOException {
-        var stone = new Stone();
-        var result = stone.readText("[]");
+    void testReadUnwrappedValueCustomProducer() {
+        var repository = new StandardProducerRepository();
+        var decoder = new StoneTextDecoder(repository);
 
-        assertInstanceOf(UntypedList.class, result);
+        repository.register(Boolean.class, ValueProducer.of("on"::equals));
+
+        assertTrue(decoder.read("on", Boolean.class));
+        assertFalse(decoder.read("off", Boolean.class));
     }
 
     @Test
-    void testSoftTypedArray() throws IOException {
-        var stone = new Stone();
-        var result = (SoftTypedList)stone.readText("SomeType []");
+    void testReadWrappedValueDefaultProducer() {
+        var decoder = new StoneTextDecoder();
 
-        assertEquals("SomeType", result.getTypeName());
+        assertInstanceOf(DefaultValue.class, decoder.read("()"));
+        assertInstanceOf(DefaultTypedValue.class, decoder.read("T()"));
+        assertEquals(Map.of(), decoder.read("({})"));
     }
 
     @Test
-    void testHardTypedArray() throws IOException {
-        var stone = new Stone();
+    void testReadValueCustomProducerByName() {
+        var repository = new StandardProducerRepository();
+        var decoder = new StoneTextDecoder(repository);
+        repository.register("D", new DurationProducer());
 
-        stone.registerArrayProducer(HardTypedList.class);
+        var result = decoder.read("D(PT1S)");
 
-        var result = stone.readText("HardTypedList []");
-
-        assertInstanceOf(HardTypedList.class, result);
+        assertInstanceOf(Duration.class, result);
+        assertEquals(1, ((Duration)result).get(ChronoUnit.SECONDS));
     }
 
     @Test
-    void testEmptyValue() throws IOException {
-        var stone = new Stone();
-        var result = stone.readText("()");
+    void testReadValueCustomProducerByHint() {
+        var repository = new StandardProducerRepository();
+        var decoder = new StoneTextDecoder(repository);
+        repository.register(Duration.class, new DurationProducer());
 
-        assertInstanceOf(EmptyValue.class, result);
+        var result = decoder.read("PT1S", Duration.class);
+
+        assertEquals(1, result.get(ChronoUnit.SECONDS));
     }
 
     @Test
-    void testNullValue() throws IOException {
-        var stone = new Stone();
-        var result = stone.readText("null");
+    void testReadObjectDefaultProducersFallback() {
+        var decoder = new StoneTextDecoder();
 
-        assertNull(result);
+        // Typing
+        assertInstanceOf(DefaultObject.class, decoder.read("{}"));
+        assertInstanceOf(DefaultTypedObject.class, decoder.read("T{}"));
+
+        // Keys
+        assertEquals(Map.of("k1", "v1"), decoder.read("{k1: v1}"));
+        assertEquals(Map.of("k1", "v1", "k2", "v2"), decoder.read(" { k1 : v1 , k2 : v2 } "));
+        assertEquals(Map.of("k1", "v1"), decoder.read("{\"k1\": \"v1\"}"));
+        assertEquals(Map.of("null", "v"), decoder.read("{null:v}"));
     }
 
     @Test
-    void testTrueValue() throws IOException {
-        var stone = new Stone();
-        var result = stone.readText("true");
+    void testReadObjectDefaultProducersByTypeHint() {
+        var decoder = new StoneTextDecoder();
 
-        assertEquals(true, result);
+        // Typing
+        assertInstanceOf(Hashtable.class, decoder.read("{}", Hashtable.class));
     }
 
     @Test
-    void testFalseValue() throws IOException {
-        var stone = new Stone();
-        var result = stone.readText("false");
+    void testReadObjectCustomProducerByName() {
+        var repository = new StandardProducerRepository();
+        var decoder = new StoneTextDecoder(repository);
+        repository.register("M", new ClassObjectProducer(Message.class));
 
-        assertEquals(false, result);
+        var result = decoder.read("M{content:test}");
+
+        assertInstanceOf(Message.class, result);
+        assertEquals("test", ((Message)result).content);
     }
 
     @Test
-    void testIntegerValue() throws IOException {
-        var stone = new Stone();
-        var result = stone.readText("12345");
+    void testReadObjectCustomProducerByHint() {
+        var repository = new StandardProducerRepository();
+        var decoder = new StoneTextDecoder(repository);
+        repository.register(Message.class, new ClassObjectProducer(Message.class));
 
-        assertEquals(new BigInteger("12345"), result);
+        var result = decoder.read("{content:test}", Message.class);
+
+        assertEquals("test", result.content);
     }
 
     @Test
-    void testDecimalValue() throws IOException {
-        var stone = new Stone();
-        var result = stone.readText("12.34");
+    void testReadArrayDefaultProducers() {
+        var decoder = new StoneTextDecoder();
 
-        assertEquals(new BigDecimal("12.34"), result);
+        // Typing
+        assertInstanceOf(DefaultList.class, decoder.read("[]"));
+        assertInstanceOf(DefaultTypedList.class, decoder.read("T[]"));
+
+        // Keys
+        assertEquals(List.of("e0"), decoder.read("[e0]"));
+        assertEquals(List.of("e0", "e1"), decoder.read("[e0, e1]"));
+        assertEquals(List.of("e0", "e1", "e2"), decoder.read("[e0, e1, e2]"));
     }
 
     @Test
-    void testSoftTypedValue() throws IOException {
-        var stone = new Stone();
-        var result = (SoftTypedValue)stone.readText("SomeValue()");
+    void testReadArrayCustomProducerByName() {
+        var repository = new StandardProducerRepository();
+        var decoder = new StoneTextDecoder(repository);
+        repository.register("SL", new ClassListProducer(StringList.class));
 
-        assertEquals("SomeType", result.getTypeName());
-        assertEquals(0, result.getArguments().length);
+        var result = decoder.read("SL[a, b, c]");
+
+        assertInstanceOf(StringList.class, result);
+        assertEquals(List.of("a", "b", "c"), result);
     }
 
     @Test
-    void testObjectWithStringKeys() throws IOException {
-        var stone = new Stone();
-        var result = stone.readText("{\"key\": value}", Map.class);
+    void testReadArrayCustomProducerByHint() {
+        var repository = new StandardProducerRepository();
+        var decoder = new StoneTextDecoder(repository);
+        repository.register(StringList.class, new ClassListProducer(StringList.class));
 
-        assertEquals("value", result.get("key"));
+        var result = decoder.read("[a, b, c]", StringList.class);
+
+        assertEquals(List.of("a", "b", "c"), result);
     }
 
     @Test
-    void testUnknownReferenceNoType() {
-        var stone = new Stone();
-        var text = "{value: <SOME_REF>}";
-        var e = assertException(
-                UnknownReferenceException.class,
-                () -> stone.readText(text));
+    void testUseCleanDefaultTypes() {
+        var decoder = new StoneTextDecoder();
 
-        assertTrue(e.getMessage().contains("SOME_REF"));
+        decoder.setUseCleanDefaultTypes(true);
+
+        assertTrue(decoder.getUseCleanDefaultTypes());
+        assertNotInstanceOf(DefaultTypedObject.class, decoder.read("T{}"));
+        assertNotInstanceOf(DefaultTypedList.class, decoder.read("T[]"));
+        assertNotInstanceOf(DefaultTypedValue.class, decoder.read("T()"));
     }
 
     @Test
-    void testUnknownReferenceWithType() {
-        var stone = new Stone();
-        var text = "{value: SOME_TYPE<SOME_REF>}";
-        var e = assertException(
-                UnknownReferenceException.class,
-                () -> stone.readText(text));
-
-        assertTrue(e.getMessage().contains("SOME_TYPE"));
-        assertTrue(e.getMessage().contains("SOME_REF"));
-    }
-
-    @Test
-    void testObjectReference() throws IOException {
-        var stone = new Stone();
-        var text = "{original: <1> {}, reference: <1>}";
-        var result = stone.readText(text, Map.class);
-
-        assertInstanceOf(Map.class, result.get("original"));
-        assertSame(result.get("original"), result.get("reference"));
-    }
-
-    @Test
-    void testArrayReference() throws IOException {
-        var stone = new Stone();
-        var text = "{original: <1> [], reference: <1>}";
-        var result = stone.readText(text, Map.class);
-
-        assertInstanceOf(List.class, result.get("original"));
-        assertSame(result.get("original"), result.get("reference"));
-    }
-
-    @Test
-    void testValueReference() throws IOException {
-        var stone = new Stone();
-        var text = "{original: <1>(123), reference: <1>}";
-        var result = stone.readText(text, Map.class);
-
-        assertInstanceOf(Number.class, result.get("original"));
-        assertSame(result.get("original"), result.get("reference"));
-    }
-
-    @Test
-    void testInvalidReference() {
-        var stone = new Stone();
-        var text = "<>(value)";
+    void testInvalidSyntax() {
+        var decoder = new StoneTextDecoder();
 
         assertException(
                 InvalidSyntaxException.class,
-                () -> stone.readText(text, Map.class));
+                () -> decoder.read("???"));
     }
 
     @Test
-    void testStringEscapedChars() throws IOException {
-        var stone = new Stone();
+    void testInvalidSyntaxTypeReferenceNoContent() {
+        var decoder = new StoneTextDecoder();
+
+        assertException(
+                InvalidSyntaxException.class,
+                () -> decoder.read("T<1>"));
+    }
+
+    @Test
+    void testStringEscapedChars() {
+        var decoder = new StoneTextDecoder();
         var entries = Map.of(
                 "\"\\r\"", "\r",
                 "\"\\n\"", "\n",
@@ -233,54 +263,28 @@ class StoneTextDecoderTest {
         for (var entry : entries.entrySet()) {
             var text = entry.getKey();
             var expected = entry.getValue();
-            var result = stone.readText(text);
+            var result = decoder.read(new SequenceInput(text));
 
             assertEquals(expected, result, "Expected " + PP.str(text) + " to produce " + PP.str(expected) + ".");
         }
     }
 
     @Test
-    void testStringEscapedLF() throws IOException {
-        var stone = new Stone();
-        var text = "\"\\n\"";
-        var result = stone.readText(text);
-
-        assertEquals("\n", result);
-    }
-
-    @Test
     void testInvalidStringEscapedChars() {
-        var stone = new Stone();
+        var decoder = new StoneTextDecoder();
         var text = "\"\\x\"";
-        var e = assertException(InvalidSyntaxException.class, () -> stone.readText(text));
+        var e = assertException(InvalidSyntaxException.class, () -> decoder.read(new SequenceInput(text)));
 
         assertTrue(e.getMessage().contains("x"));
     }
 
     @Test
-    void testReadDuration() throws IOException {
-        var stone = new Stone();
-        var text = "PT23H59M60S";
-        var d = stone.readText(text, Duration.class);
+    void testInvalidReference() {
+        var decoder = new StoneTextDecoder();
 
-        assertEquals(86400, d.get(ChronoUnit.SECONDS));
-    }
-
-    @Test
-    void testArrayMultipleItems() throws IOException {
-        var stone = new Stone();
-        var text = "[null, true, false, 1, 0.5, 'abc', [], {}]";
-        var result = (UntypedList)stone.readText(text);
-
-        assertNull(result.get(0));
-        assertEquals(true, result.get(1));
-        assertEquals(false, result.get(2));
-        assertEquals(BigInteger.ONE, result.get(3));
-        assertEquals(new BigDecimal("0.5"), result.get(4));
-        assertEquals("abc", result.get(5));
-        assertTrue(result.get(6) instanceof List);
-        assertTrue(result.get(7) instanceof Map);
-        assertEquals(8, result.size());
+        assertException(
+                InvalidSyntaxException.class,
+                () -> decoder.read("<>(value)"));
     }
 
 }

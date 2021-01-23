@@ -1,185 +1,162 @@
 package org.stonedata.coding.text;
 
-import org.stonedata.coding.StoneCharDecoder;
 import org.stonedata.errors.InvalidSyntaxException;
 import org.stonedata.io.StoneCharInput;
+import org.stonedata.io.impl.SequenceInput;
 import org.stonedata.producers.ArrayProducer;
 import org.stonedata.producers.ObjectProducer;
-import org.stonedata.repositories.ProducerRepository;
 import org.stonedata.producers.ValueProducer;
-import org.stonedata.producers.standard.array.SoftTypedListProducer;
-import org.stonedata.producers.standard.array.UntypedListProducer;
-import org.stonedata.producers.standard.object.SoftTypedObjectProducer;
-import org.stonedata.producers.standard.object.UntypedObjectProducer;
-import org.stonedata.producers.standard.value.SoftTypedValueProducer;
-import org.stonedata.producers.standard.value.UntypedValueProducer;
+import org.stonedata.producers.standard.StandardArrayProducers;
+import org.stonedata.producers.standard.StandardObjectProducers;
+import org.stonedata.producers.standard.StandardValueProducers;
 import org.stonedata.references.ReferenceTracker;
-import org.stonedata.references.impl.StandardReferenceTracker;
+import org.stonedata.references.impl.DefaultReferenceTracker;
+import org.stonedata.repositories.ProducerRepository;
 import org.stonedata.util.PP;
 
-import java.io.IOException;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.regex.Pattern;
 
-public class StoneTextDecoder implements StoneCharDecoder {
+public class StoneTextDecoder {
 
     private final ReferenceTracker references;
     private final ProducerRepository producers;
 
-    public StoneTextDecoder(ProducerRepository producers) {
-        this(new StandardReferenceTracker(), producers);
+    private boolean useCleanDefaultTypes;
+
+    public StoneTextDecoder() {
+        this(null, null);
     }
 
-    public StoneTextDecoder(ReferenceTracker references, ProducerRepository producers) {
-        this.references = references;
+    public StoneTextDecoder(ReferenceTracker references) {
+        this(null, references);
+    }
+
+    public StoneTextDecoder(ProducerRepository producers) {
+        this(producers, null);
+    }
+
+    public StoneTextDecoder(ProducerRepository producers, ReferenceTracker references) {
+        this.references = (references != null ? references : new DefaultReferenceTracker());
         this.producers = producers;
     }
 
-    @Override
-    public Object read(StoneCharInput input) throws IOException {
-        return read(input, null);
+    public boolean getUseCleanDefaultTypes() {
+        return useCleanDefaultTypes;
     }
 
-    public Object read(StoneCharInput input, Type typeHint) throws IOException {
+    public void setUseCleanDefaultTypes(boolean useCleanDefaultTypes) {
+        this.useCleanDefaultTypes = useCleanDefaultTypes;
+    }
+
+    public Object read(CharSequence text) {
+        return read(new SequenceInput(text));
+    }
+
+    public <T> T read(CharSequence text, Class<T> typeClass) {
+        return read(new SequenceInput(text), typeClass);
+    }
+
+    public Object read(StoneCharInput input) {
+        return readWithHint(input, null);
+    }
+
+    public <T> T read(StoneCharInput input, Class<T> typeClass) {
+        var result = readWithHint(input, typeClass);
+
+        return typeClass.cast(result);
+    }
+
+    // PRIVATE
+
+    private Object readWithHint(StoneCharInput input, Type typeHint) {
         skipWhitespace(input);
 
-        var c = input.peek();
-
-        if (isTokenChar(c)) {
-            return continueToHeadToken(input, typeHint);
-        }
-        else if(isStringDelimiter(c)) {
-            return continueToHeadString(input, typeHint);
-        }
-        else {
-            return continueWithHead(input, typeHint, null);
-        }
-    }
-
-    private Object continueToHeadToken(StoneCharInput input, Type typeHint) throws IOException {
-        var head = continueToken(input);
-
-        if ("null".equals(head)) {
-            return null;
-        }
-        else if ("true".equals(head)) {
-            return true;
-        }
-        else if ("false".equals(head)) {
-            return false;
-        }
-        else if (isInteger(head)) {
-            return new BigInteger(head);
-        }
-        else if (isDecimal(head)) {
-            return new BigDecimal(head);
-        }
-        else {
-            skipWhitespace(input);
-
-            return continueWithHead(input, typeHint, head);
-        }
-    }
-
-    private Object continueToHeadString(StoneCharInput input, Type typeHint) throws IOException {
-        var head = continueString(input);
-
-        skipWhitespace(input);
-
-        return continueWithHead(input, typeHint, head);
-    }
-
-    private Object continueWithHead(StoneCharInput input, Type typeHint, String head) throws IOException {
-        var c = input.peek();
-
-        if (c == '<') {
-            return continueToReference(input, typeHint, head);
-        }
-        else {
-            return continueWithReference(input, typeHint, head, null);
-        }
-    }
-
-    private Object continueToReference(StoneCharInput input, Type typeHint, String head) throws IOException {
-        input.expect('<');
-
-        var reference = readKeyOrNull(input);
-
-        if (reference == null) {
-            throw new InvalidSyntaxException(input.getLocation(), "Expected reference key");
-        }
-
-        skipWhitespace(input);
-
-        input.expect('>');
-
-        skipWhitespace(input);
-
-        return continueWithReference(input, typeHint, head, reference);
-    }
-
-    private Object continueWithReference(StoneCharInput input, Type typeHint, String head, String reference) throws IOException {
         var c = input.peek();
 
         if (c == '{') {
-            return continueToObject(input, head, typeHint, reference);
+            return readObject(input, null, typeHint);
         }
         else if (c == '[') {
-            return continueToArray(input, head, typeHint, reference);
+            return readArray(input, null, typeHint);
         }
         else if (c == '(') {
-            return continueToValue(input, head, typeHint, reference);
+            return readValue(input, null, typeHint);
         }
-        else if (reference != null) {
-            return references.retrieve(head, reference);
+        else if (c == '<') {
+            return readReference(input, null, typeHint);
+        }
+
+        Object atomic;
+
+        if (isTokenChar(c)) {
+            atomic = evalToken(continueToken(input));
+        }
+        else if(isStringDelimiter(c)) {
+            atomic = continueString(input);
         }
         else {
-            return continueWithLiteral(head, typeHint);
+            throw new InvalidSyntaxException("Expected to read a value.", input.getLocation());
+        }
+
+        if (atomic instanceof String) {
+            skipWhitespace(input);
+
+            c = input.peek();
+
+            if (c == '{') {
+                return readObject(input, (String)atomic, typeHint);
+            }
+            else if (c == '[') {
+                return readArray(input, (String)atomic, typeHint);
+            }
+            else if (c == '(') {
+                return readValue(input, (String)atomic, typeHint);
+            }
+            else if (c == '<') {
+                return readReference(input, (String)atomic, typeHint);
+            }
+        }
+
+        return evalValue(atomic, typeHint);
+    }
+
+    private Object evalValue(Object value, Type typeHint) {
+        var producer = searchValueProducer(null, typeHint);
+
+        return producer.newInstance(new Object[]{value});
+    }
+
+    private Object readReference(StoneCharInput input, String typeName, Type typeHint) {
+        var reference = readReference(input);
+
+        skipWhitespace(input);
+
+        var c = input.peek();
+
+        if (c == '{') {
+            return store(reference, readObject(input, typeName, typeHint));
+        }
+        else if (c == '[') {
+            return store(reference, readArray(input, typeName, typeHint));
+        }
+        else if (c == '(') {
+            return store(reference, readValue(input, typeName, typeHint));
+        }
+        else if (typeName == null) {
+            // If there is no type name, it can be just a reference
+            return references.retrieve(reference);
+        }
+        else {
+            throw new InvalidSyntaxException("Expected value for " + typeName + "<" + reference + ">.", input.getLocation());
         }
     }
 
-    private Object continueToObject(StoneCharInput input, String typeName, Type typeHint, String reference) throws IOException {
-        var value = readObject(input, typeName, typeHint);
-
-        if (reference != null) {
-            references.store(typeName, value, reference);
-        }
-
-        return value;
-    }
-
-    private Object continueToArray(StoneCharInput input, String typeName, Type typeHint, String reference) throws IOException {
-        var value = readArray(input, typeName, typeHint);
-
-        if (reference != null) {
-            references.store(typeName, value, reference);
-        }
-
-        return value;
-    }
-
-    private Object continueToValue(StoneCharInput input, String typeName, Type typeHint, String reference) throws IOException {
-        var value = readValue(input, typeName, typeHint);
-
-        if (reference != null) {
-            references.store(typeName, value, reference);
-        }
-
-        return value;
-    }
-
-    private Object continueWithLiteral(String literal, Type typeHint) {
-        var producer = valueProducer(null, typeHint);
-
-        return producer.newInstance(List.of(literal));
-    }
-
-    private Object readObject(StoneCharInput input, String typeName, Type typeHint) throws IOException {
-        var producer = objectProducer(typeName, typeHint);
+    private Object readObject(StoneCharInput input, String typeName, Type typeHint) {
+        var producer = searchObjectProducer(typeName, typeHint);
         var obj = producer.beginInstance();
 
         input.expect('{');
@@ -200,7 +177,7 @@ public class StoneTextDecoder implements StoneCharDecoder {
             skipWhitespace(input);
 
             var keyTypeHint = producer.getTypeHint(key);
-            var value = read(input, keyTypeHint);
+            var value = readWithHint(input, keyTypeHint);
 
             producer.set(obj, key, value);
 
@@ -213,8 +190,8 @@ public class StoneTextDecoder implements StoneCharDecoder {
         return producer.endInstance(obj);
     }
 
-    private Object readArray(StoneCharInput input, String typeName, Type typeHint) throws IOException {
-        var producer = arrayProducer(typeName, typeHint);
+    private Object readArray(StoneCharInput input, String typeName, Type typeHint) {
+        var producer = searchArrayProducer(typeName, typeHint);
         var componentTypeHint = producer.getComponentTypeHint();
         var arr = producer.beginInstance();
 
@@ -227,7 +204,7 @@ public class StoneTextDecoder implements StoneCharDecoder {
                 break;
             }
 
-            var value = read(input, componentTypeHint);
+            var value = readWithHint(input, componentTypeHint);
 
             producer.add(arr, value);
 
@@ -240,8 +217,8 @@ public class StoneTextDecoder implements StoneCharDecoder {
         return producer.endInstance(arr);
     }
 
-    private Object readValue(StoneCharInput input, String typeName, Type typeHint) throws IOException {
-        var maker = valueProducer(typeName, typeHint);
+    private Object readValue(StoneCharInput input, String typeName, Type typeHint) {
+        var producer = searchValueProducer(typeName, typeHint);
         var arguments = new ArrayList<>();
 
         input.expect('(');
@@ -263,46 +240,83 @@ public class StoneTextDecoder implements StoneCharDecoder {
 
         input.expect(')');
 
-        return maker.newInstance(arguments);
+        return producer.newInstance(arguments.toArray());
     }
 
-    private ObjectProducer objectProducer(String typeName, Type typeHint) {
-        var producer = producers.getObjectProducer(typeName, typeHint);
-        if (producer != null) {
-            return producer;
+    private ObjectProducer searchObjectProducer(String typeName, Type typeHint) {
+        if (producers != null) {
+            // Try to get it with the type name
+            if (typeName != null) {
+                var producer = producers.getObjectProducer(typeName);
+                if (producer != null) {
+                    return producer;
+                }
+            }
+
+            // Try to get it with the type hint
+            if (typeHint != null) {
+                var producer = producers.getObjectProducer(typeHint);
+                if (producer != null) {
+                    return producer;
+                }
+            }
         }
-        else if (typeName != null) {
-            return new SoftTypedObjectProducer(typeName);
-        }
-        return UntypedObjectProducer.INSTANCE;
+
+        return StandardObjectProducers.create(typeName, typeHint, useCleanDefaultTypes);
     }
 
-    private ArrayProducer arrayProducer(String typeName, Type typeHint) {
-        var producer = producers.getArrayProducer(typeName, typeHint);
-        if (producer != null) {
-            return producer;
+    private ArrayProducer searchArrayProducer(String typeName, Type typeHint) {
+        if (producers != null) {
+            // Try to get it with the type name
+            if (typeName != null) {
+                var producer = producers.getArrayProducer(typeName);
+                if (producer != null) {
+                    return producer;
+                }
+            }
+
+            // Try to get it with the type hint
+            if (typeHint != null) {
+                var producer = producers.getArrayProducer(typeHint);
+                if (producer != null) {
+                    return producer;
+                }
+            }
         }
-        else if (typeName != null) {
-            return new SoftTypedListProducer(typeName);
-        }
-        return UntypedListProducer.INSTANCE;
+
+        return StandardArrayProducers.create(typeName, typeHint, useCleanDefaultTypes);
     }
 
-    private ValueProducer valueProducer(String typeName, Type typeHint) {
-        var producer = producers.getValueProducer(typeName, typeHint);
-        if (producer != null) {
-            return producer;
+    private ValueProducer searchValueProducer(String typeName, Type typeHint) {
+        if (producers != null) {
+            if (typeName != null) {
+                var producer = producers.getValueProducer(typeName);
+                if (producer != null) {
+                    return producer;
+                }
+            }
+
+            if (typeHint != null) {
+                var  producer = producers.getValueProducer(typeHint);
+                if (producer != null) {
+                    return producer;
+                }
+            }
         }
-        else if (typeName != null) {
-            return new SoftTypedValueProducer(typeName);
-        }
-        return UntypedValueProducer.INSTANCE;
+
+        return StandardValueProducers.create(typeName, typeHint, useCleanDefaultTypes);
+    }
+
+    private Object store(String reference, Object value) {
+        references.store(reference, value);
+        return value;
     }
 
     // STATIC
+
     private static final Pattern INTEGER_PATTERN = Pattern.compile("[+-]?[0-9]+");
 
-    private static final Pattern DECIMAL_PATTERN = Pattern.compile("[+-]?[0-9]+\\.[0-9]+([eE][+-][0-9]+)?");
+    private static final Pattern DECIMAL_PATTERN = Pattern.compile("[+-]?[0-9]*\\.[0-9]+([eE][+-]?[0-9]+)?");
 
     private static boolean isInteger(String str) {
         return INTEGER_PATTERN.matcher(str).matches();
@@ -327,13 +341,13 @@ public class StoneTextDecoder implements StoneCharDecoder {
         return c == ' ' || c == '\n' || c == '\t'  || c == '\r';
     }
 
-    private static void skipWhitespace(StoneCharInput input) throws IOException {
+    private static void skipWhitespace(StoneCharInput input) {
         while (isWhitespace(input.peek())) {
             input.pull();
         }
     }
 
-    private static String readKeyOrNull(StoneCharInput input) throws IOException {
+    private static String readKeyOrNull(StoneCharInput input) {
         var c = input.peek();
         if (isTokenChar(c)) {
             return continueToken(input);
@@ -344,7 +358,7 @@ public class StoneTextDecoder implements StoneCharDecoder {
         return null;
     }
 
-    private static String continueToken(StoneCharInput input) throws IOException {
+    private static String continueToken(StoneCharInput input) {
         var token = new StringBuilder();
 
         do {
@@ -357,7 +371,7 @@ public class StoneTextDecoder implements StoneCharDecoder {
         return token.toString();
     }
 
-    private static String continueString(StoneCharInput input) throws IOException {
+    private static String continueString(StoneCharInput input) {
         var delimiter = input.pull();
         var buffer = new StringBuilder();
 
@@ -393,8 +407,8 @@ public class StoneTextDecoder implements StoneCharDecoder {
                     buffer.append(code);
                 }
                 else {
-                    throw new InvalidSyntaxException(input.getLocation(),
-                            String.format("Invalid escaped char: %s", PP.str(chr)));
+                    throw new InvalidSyntaxException(
+                            String.format("Invalid escaped char: %s", PP.str(chr)), input.getLocation());
                 }
             }
             else {
@@ -403,6 +417,43 @@ public class StoneTextDecoder implements StoneCharDecoder {
         }
 
         return buffer.toString();
+    }
+
+    private static String readReference(StoneCharInput input) {
+        input.expect('<');
+
+        var reference = readKeyOrNull(input);
+
+        if (reference == null) {
+            throw new InvalidSyntaxException("Expected a reference key.", input.getLocation());
+        }
+
+        skipWhitespace(input);
+
+        input.expect('>');
+
+        return reference;
+    }
+
+    private static Object evalToken(String token) {
+        if ("null".equals(token)) {
+            return null;
+        }
+        else if ("true".equals(token)) {
+            return true;
+        }
+        else if ("false".equals(token)) {
+            return false;
+        }
+        else if (isInteger(token)) {
+            return new BigInteger(token);
+        }
+        else if (isDecimal(token)) {
+            return new BigDecimal(token);
+        }
+        else {
+            return token;
+        }
     }
 
 }

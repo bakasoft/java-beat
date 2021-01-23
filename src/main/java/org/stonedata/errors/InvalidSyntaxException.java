@@ -4,7 +4,7 @@ import org.stonedata.io.TextLocation;
 
 public class InvalidSyntaxException extends StoneException {
 
-    public InvalidSyntaxException(TextLocation location, String message) {
+    public InvalidSyntaxException(String message, TextLocation location) {
         super(generateMessage(location, message));
     }
 

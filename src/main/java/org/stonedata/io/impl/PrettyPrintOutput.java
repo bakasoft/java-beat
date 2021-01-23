@@ -1,5 +1,6 @@
 package org.stonedata.io.impl;
 
+import org.stonedata.errors.StoneException;
 import org.stonedata.io.StoneCharOutput;
 
 import java.io.IOException;
@@ -16,29 +17,49 @@ public class PrettyPrintOutput implements StoneCharOutput {
     }
 
     @Override
-    public void write(char value) throws IOException {
-        output.append(value);
+    public void write(char value) {
+        try {
+            output.append(value);
+        }
+        catch (IOException e) {
+            throw new StoneException(e);
+        }
     }
 
     @Override
-    public void write(CharSequence value) throws IOException {
-        output.append(value);
+    public void write(CharSequence value) {
+        try {
+            output.append(value);
+        }
+        catch (IOException e) {
+            throw new StoneException(e);
+        }
     }
 
     @Override
-    public void space() throws IOException {
-        output.append(' ');
+    public void space() {
+        try {
+            output.append(' ');
+        }
+        catch (IOException e) {
+            throw new StoneException(e);
+        }
     }
 
     @Override
-    public void line() throws IOException {
-        output.append('\n');
+    public void line() {
+        try {
+            output.append('\n');
 
-        output.append("  ".repeat(tabs));
+            output.append("  ".repeat(tabs));
+        }
+        catch (IOException e) {
+            throw new StoneException(e);
+        }
     }
 
     @Override
-    public void indent(int delta) throws IOException {
+    public void indent(int delta) {
         tabs += delta;
     }
 }

@@ -7,27 +7,20 @@ import java.util.Map;
 
 public class StandardReferenceProvider implements ReferenceProvider {
 
-    private Map<String, Map<Object, String>> data;
+    private Map<Object, String> valueReferences;
 
-    public void setReference(String typeName, Object value, String reference) {
-        if (data == null) {
-            data = new HashMap<>();
+    public void setReference(Object value, String reference) {
+        if (valueReferences == null) {
+            valueReferences = new HashMap<>();
         }
-        var map = data.computeIfAbsent(typeName, k -> new HashMap<>());
-        if (map.containsKey(value)) {
-            throw new RuntimeException();
-        }
-        map.put(value, reference);
+        valueReferences.put(value, reference);
     }
 
     @Override
-    public String getReference(String typeName, Object value) {
-        if (data != null) {
-            var map = data.get(typeName);
-            if (map != null) {
-                return map.get(value);
-            }
+    public String getReference(Object value) {
+        if (valueReferences == null) {
+            return null;
         }
-        return null;
+        return valueReferences.get(value);
     }
 }

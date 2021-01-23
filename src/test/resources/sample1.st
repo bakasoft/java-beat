@@ -1,11 +1,11 @@
 Panel {
-  layout: (HORIZONTAL),
+  layout: HORIZONTAL,
   elements: [
     Label {
       text: User
     },
     Panel {
-      layout: (VERTICAL),
+      layout: VERTICAL,
       elements: [
         Label {
           text: Name

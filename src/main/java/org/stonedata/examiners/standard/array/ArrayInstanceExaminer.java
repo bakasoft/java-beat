@@ -4,11 +4,15 @@ import org.stonedata.examiners.ArrayExaminer;
 
 import java.lang.reflect.Array;
 
-public class ObjectArrayExaminer implements ArrayExaminer {
+public class ArrayInstanceExaminer implements ArrayExaminer {
 
-    public static final ObjectArrayExaminer INSTANCE = new ObjectArrayExaminer();
+    public static final ArrayInstanceExaminer ANONYMOUS_INSTANCE = new ArrayInstanceExaminer(null);
 
-    private ObjectArrayExaminer() {}
+    private final String typeName;
+
+    public ArrayInstanceExaminer(String typeName) {
+        this.typeName = typeName;
+    }
 
     @Override
     public int getSizeOf(Object value) {
@@ -22,6 +26,6 @@ public class ObjectArrayExaminer implements ArrayExaminer {
 
     @Override
     public String getType() {
-        return null;  // Anonymous
+        return typeName;
     }
 }

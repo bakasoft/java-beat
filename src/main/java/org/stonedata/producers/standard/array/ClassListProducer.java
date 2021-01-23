@@ -1,29 +1,23 @@
 package org.stonedata.producers.standard.array;
 
-import org.stonedata.Stone;
 import org.stonedata.errors.StoneException;
 import org.stonedata.producers.ArrayProducer;
-import org.stonedata.types.array.HardTypedList;
+import org.stonedata.util.ReflectUtils;
 
 import java.lang.reflect.Type;
 import java.util.List;
+import java.util.function.Supplier;
 
 public class ClassListProducer implements ArrayProducer {
-    private final Class<?> typeClass;
+    private final Supplier<?> listMaker;
 
     public ClassListProducer(Class<?> typeClass) {
-        this.typeClass = typeClass;
+        listMaker = ReflectUtils.extractEmptyConstructor(typeClass, List.class);
     }
 
     @Override
     public Object beginInstance() {
-        try {
-            return typeClass.newInstance();
-        } catch (InstantiationException e) {
-            throw new StoneException(e);
-        } catch (IllegalAccessException e) {
-            throw new StoneException(e);
-        }
+        return listMaker.get();
     }
 
     @Override

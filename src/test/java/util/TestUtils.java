@@ -18,35 +18,7 @@ public class TestUtils {
 
         stone.writeText(result, buffer, true);
 
-        var expectedLines = text.split("\n");
-        var actualLines = buffer.toString().split("\n");
-
-        int eI = 0;
-        int aI = 0;
-
-        while (eI < expectedLines.length || aI < actualLines.length) {
-            var expectedLine = eI < expectedLines.length ? expectedLines[eI].trim() : "";
-            var actualLine = aI < actualLines.length ? actualLines[aI].trim() : "";
-
-            if (Objects.equals(expectedLine, actualLine)) {
-                eI++;
-                aI++;
-            }
-            else if (expectedLine.isEmpty()) {
-                eI++;
-            }
-            else if (actualLine.isEmpty()) {
-                aI++;
-            }
-            else {
-                var message = String.format(
-                        "" +
-                                "Expected (Ln. %s): %s\n" +
-                                "But was  (Ln. %s): %s\n",
-                        eI, expectedLine, aI, actualLine);
-                throw new AssertionError(message);
-            }
-        }
+        CustomAssertions.assertSameText(text, buffer.toString());
     }
 
     public static byte[] parseBinaryBytes(String input) {

@@ -19,11 +19,11 @@ public class ClassEnumExaminer implements ValueExaminer {
     }
 
     @Override
-    public List<Object> computeArguments(Object value) {
+    public Object extractArgument(Object value) {
         if (type.isInstance(value)) {
             Enum<?> e = (Enum<?>)value;
 
-            return List.of(e.name());
+            return e.name();
         }
         else {
             throw new RuntimeException();

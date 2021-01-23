@@ -7,9 +7,15 @@ import org.stonedata.producers.ValueProducer;
 import java.lang.reflect.Type;
 
 public interface ProducerRepository {
-    ObjectProducer getObjectProducer(String typeName, Type typeHint);
+    ObjectProducer getObjectProducer(String typeName);
 
-    ArrayProducer getArrayProducer(String typeName, Type typeHint);
+    ObjectProducer getObjectProducer(Type typeHint);
 
-    ValueProducer getValueProducer(String typeName, Type typeHint);
+    ArrayProducer getArrayProducer(String typeName);
+
+    ArrayProducer getArrayProducer(Type typeHint);
+
+    ValueProducer getValueProducer(String typeName);
+
+    ValueProducer getValueProducer(Type typeHint);
 }

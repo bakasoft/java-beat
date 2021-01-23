@@ -4,22 +4,32 @@ import org.stonedata.errors.CyclicDocumentException;
 import org.stonedata.errors.UnsupportedValueException;
 import org.stonedata.examiners.ArrayExaminer;
 import org.stonedata.examiners.Examiner;
+import org.stonedata.examiners.standard.array.ArrayInstanceExaminer;
+import org.stonedata.examiners.standard.array.ListExaminer;
+import org.stonedata.examiners.standard.object.ClassObjectExaminer;
+import org.stonedata.examiners.standard.object.MapExaminer;
+import org.stonedata.examiners.standard.value.ClassEnumExaminer;
+import org.stonedata.examiners.standard.value.DefaultTypedValueExaminer;
+import org.stonedata.examiners.standard.value.ValueIdentityExaminer;
+import org.stonedata.io.impl.AppendableOutput;
 import org.stonedata.repositories.ExaminerRepository;
 import org.stonedata.examiners.ObjectExaminer;
 import org.stonedata.examiners.ValueExaminer;
 import org.stonedata.references.ReferenceProvider;
-import org.stonedata.errors.StoneException;
 import org.stonedata.io.StoneCharOutput;
-import org.stonedata.coding.StoneCharEncoder;
-import org.stonedata.references.impl.NullReferenceProvider;
+import org.stonedata.types.array.DefaultTypedList;
+import org.stonedata.types.object.DefaultTypedObject;
+import org.stonedata.types.value.DefaultTypedValue;
+import org.stonedata.util.PP;
 
-import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
-public class StoneTextEncoder implements StoneCharEncoder {
+public class StoneTextEncoder {
 
     private final ReferenceProvider references;
     private final ExaminerRepository examiners;
@@ -28,129 +38,159 @@ public class StoneTextEncoder implements StoneCharEncoder {
 
     private final Deque<Object> cycleStack;
 
+    public StoneTextEncoder() {
+        this(null, null);
+    }
+
+    public StoneTextEncoder(ExaminerRepository examiners) {
+        this(examiners, null);
+    }
+
+    public StoneTextEncoder(ReferenceProvider references) {
+        this(null, references);
+    }
+
     public StoneTextEncoder(ExaminerRepository examiners, ReferenceProvider references) {
         this.examiners = examiners;
         this.references = references;
         this.cycleStack = new ArrayDeque<>();
     }
 
-    @Override
-    public void write(StoneCharOutput output, Object value) throws IOException {
+    public boolean isSkipNullFields() {
+        return skipNullFields;
+    }
+
+    public void setSkipNullFields(boolean skipNullFields) {
+        this.skipNullFields = skipNullFields;
+    }
+
+    public String write(Object value) {
+        var buffer = new StringBuilder();
+        var output = new AppendableOutput(buffer);
+
+        write(value, output);
+
+        return buffer.toString();
+    }
+
+    public void write(Object value, StoneCharOutput output) {
         write(output, new HashSet<>(), value);
     }
 
-    public void write(StoneCharOutput output, Set<Object> writtenRefs, Object value) throws IOException {
-        var examiner = examiners.getExaminerFor(value);
-
-        if (examiner == null) {
-            var reference = references.getReference(null, value);
-
-            if (reference != null) {
-                writeStandardValueWithReference(output, writtenRefs, value, reference);
-            }
-            else {
-                writeStandardValue(output, value);
-            }
-        }
-        else {
+    private void write(StoneCharOutput output, Set<Object> writtenRefs, Object value) {
+        var reference = references != null ? references.getReference(value) : null;
+        if (reference == null) {
+            var examiner = searchExaminer(value);
             var typeName = examiner.getType();
-            var reference = references.getReference(typeName, value);
-
             if (typeName == null) {
-                if (reference == null) {
-                    writeExamined(output, writtenRefs, value, examiner);
-                }
-                else {
-                    writeExaminedWithReference(output, writtenRefs, value, examiner, reference);
-                }
-            }
-            else if (reference == null) {
-                writeExaminedWithTypeName(output, writtenRefs, value, examiner, typeName);
+                writeContent(output, writtenRefs, value, examiner, false);
             }
             else {
-                writeExaminedWithTypeNameAndReference(output, writtenRefs, value, examiner, typeName, reference);
+                writeString(output, typeName);
+                output.space();
+                writeContent(output, writtenRefs, value, examiner, true);
             }
         }
-    }
-
-    private void writeExaminedWithTypeNameAndReference(StoneCharOutput output, Set<Object> writtenRefs, Object value, Examiner examiner, String typeName, String reference) throws IOException {
-        writeString(output, typeName);
-        writeReference(output, reference);
-        if (writtenRefs.add(reference + "\0" + typeName)) {
+        else if (writtenRefs.add(reference)) {
+            var examiner = searchExaminer(value);
+            var typeName = examiner.getType();
+            if (typeName != null) {
+                writeString(output, typeName);
+            }
+            writeReference(output, reference);
             output.space();
-            writeExamined(output, writtenRefs, value, examiner);
-        }
-    }
-
-    private void writeExaminedWithTypeName(StoneCharOutput output, Set<Object> writtenRefs, Object value, Examiner examiner, String typeName) throws IOException {
-        writeString(output, typeName);
-        output.space();
-        writeExamined(output, writtenRefs, value, examiner);
-    }
-
-    private void writeExaminedWithReference(StoneCharOutput output, Set<Object> writtenRefs, Object value, Examiner examiner, String reference) throws IOException {
-        writeReference(output, reference);
-        if (writtenRefs.add(reference + "\0")) {
-            output.space();
-            writeExamined(output, writtenRefs, value, examiner);
-        }
-    }
-
-    private void writeExamined(StoneCharOutput output, Set<Object> writtenRefs, Object value, Examiner examiner) throws IOException {
-        if (cycleStack.contains(value)) {
-            throw new CyclicDocumentException(value, examiner);
-        }
-
-        cycleStack.push(value);
-
-        if (examiner instanceof ObjectExaminer) {
-            writeObject(output, writtenRefs, value, (ObjectExaminer) examiner);
-        }
-        else if (examiner instanceof ArrayExaminer) {
-            writeArray(output, writtenRefs, value, (ArrayExaminer) examiner);
-        }
-        else if (examiner instanceof ValueExaminer) {
-            writeValue(output, writtenRefs, value, (ValueExaminer) examiner);
+            writeContent(output, writtenRefs, value, examiner, true);
         }
         else {
-            throw new UnsupportedValueException(examiner);
-        }
-
-        cycleStack.pop();
-    }
-
-    private void writeStandardValueWithReference(StoneCharOutput output, Set<Object> writtenRefs, Object value, String reference) throws IOException {
-        writeReference(output, reference);
-        if (writtenRefs.add(reference + "\0")) {
-            output.space();
-            output.write('(');
-            writeStandardValue(output, value);
-            output.write(')');
+            writeReference(output, reference);
         }
     }
 
-    private void writeStandardValue(StoneCharOutput output, Object value) throws IOException {
-        if (value == null) {
-            writeNull(output);
+    private Examiner searchExaminer(Object value) {
+        // #1: Search in repository
+        if (examiners != null) {
+            var examiner = examiners.getExaminer(value);
+
+            if (examiner != null) {
+                return examiner;
+            }
         }
-        else if (value instanceof String) {
-            writeString(output, (String)value);
+
+        // TODO: Move to a module?
+
+        // #2: Search by instance
+        if (value == null
+                || value instanceof String
+                || value instanceof Boolean
+                || value instanceof Number
+                || value instanceof Character) {
+            return ValueIdentityExaminer.INSTANCE;
         }
-        else if (value instanceof Boolean) {
-            writeBoolean((Boolean)value, output);
+        else if (value instanceof DefaultTypedObject) {
+            var typeName = ((DefaultTypedObject)value).getTypeName();
+            if (typeName == null) {
+                return MapExaminer.ANONYMOUS_INSTANCE;
+            }
+            return new MapExaminer(typeName);
         }
-        else if (value instanceof Number) {
-            writeNumber((Number)value, output);
+        else if (value instanceof DefaultTypedList) {
+            var typeName = ((DefaultTypedList)value).getTypeName();
+            if (typeName == null) {
+                return ListExaminer.ANONYMOUS_INSTANCE;
+            }
+            return new ListExaminer(typeName);
         }
-        else if (value instanceof Character) {
-            writeChar((Character)value, output);
+        else if (value instanceof DefaultTypedValue) {
+            var typeName = ((DefaultTypedValue)value).getTypeName();
+            if (typeName == null) {
+                return ValueIdentityExaminer.INSTANCE;
+            }
+            return new DefaultTypedValueExaminer(typeName);
+        }
+        else if (value instanceof Map) {
+            return MapExaminer.ANONYMOUS_INSTANCE;
+        }
+        else if (value instanceof List) {
+            return ListExaminer.ANONYMOUS_INSTANCE;
+        }
+
+        // #3: Search by type
+        var typeClass = value.getClass();
+        if (typeClass.isArray()) {
+            return ArrayInstanceExaminer.ANONYMOUS_INSTANCE;
+        }
+        else if (typeClass.isEnum()) {
+            return new ClassEnumExaminer(typeClass, null);
+        }
+        return new ClassObjectExaminer(typeClass, null);
+    }
+
+    private void writeContent(StoneCharOutput output, Set<Object> writtenRefs, Object value, Examiner examiner, boolean wrap) {
+        if (examiner instanceof ValueExaminer) {
+            writeValue(output, writtenRefs, value, (ValueExaminer) examiner, wrap);
         }
         else {
-            throw new UnsupportedValueException(value);
+            if (cycleStack.contains(value)) {
+                throw new CyclicDocumentException(value, examiner);
+            }
+
+            cycleStack.push(value);
+
+            if (examiner instanceof ObjectExaminer) {
+                writeObject(output, writtenRefs, value, (ObjectExaminer) examiner);
+            }
+            else if (examiner instanceof ArrayExaminer) {
+                writeArray(output, writtenRefs, value, (ArrayExaminer) examiner);
+            }
+            else {
+                throw new UnsupportedValueException("Unsupported examiner: " + PP.typeOf(examiner));
+            }
+
+            cycleStack.pop();
         }
     }
 
-    private void writeObject(StoneCharOutput output, Set<Object> writtenRefs, Object value, ObjectExaminer examiner) throws IOException {
+    private void writeObject(StoneCharOutput output, Set<Object> writtenRefs, Object value, ObjectExaminer examiner) {
         var entryKeys = examiner.getKeys(value);
 
         if (entryKeys.isEmpty()) {
@@ -187,7 +227,7 @@ public class StoneTextEncoder implements StoneCharEncoder {
         output.write('}');
     }
 
-    private void writeArray(StoneCharOutput output, Set<Object> writtenRefs, Object value, ArrayExaminer examiner) throws IOException {
+    private void writeArray(StoneCharOutput output, Set<Object> writtenRefs, Object value, ArrayExaminer examiner) {
         var size = examiner.getSizeOf(value);
 
         if (size == 0) {
@@ -215,46 +255,103 @@ public class StoneTextEncoder implements StoneCharEncoder {
         output.write(']');
     }
 
-    private void writeValue(StoneCharOutput output, Set<Object> writtenRefs, Object value, ValueExaminer examiner) throws IOException {
-        var args = examiner.computeArguments(value);
+    private void writeValue(StoneCharOutput output, Set<Object> writtenRefs, Object value, ValueExaminer examiner, boolean wrap) {
+        var argument = examiner.extractArgument(value);
 
-        output.write('(');
+        if (argument == null) {
+            writeNull(output, wrap);
+        }
+        else if (argument instanceof String) {
+            writeString(output, (String) argument, wrap);
+        }
+        else if (argument instanceof Boolean) {
+            writeBoolean((Boolean) argument, output, wrap);
+        }
+        else if (argument instanceof Number) {
+            writeNumber((Number) argument, output, wrap);
+        }
+        else if (argument instanceof Character) {
+            writeChar((Character) argument, output, wrap);
+        }
+        else if (argument instanceof List) {
+            writeArguments(output, writtenRefs, (List<?>)argument, wrap);
+        } else {
+            throw new UnsupportedValueException("Unsupported value: " + PP.typeOf(value));
+        }
+    }
 
-        for (var i = 0; i < args.size(); i++) {
-            if (i > 0) {
-                output.write(',');
-                output.space();
+    private void writeArguments(StoneCharOutput output, Set<Object> writtenRefs, List<?> args, boolean wrap) {
+        if (args.size() != 1 || wrap) {
+            output.write('(');
+
+            for (var i = 0; i < args.size(); i++) {
+                if (i > 0) {
+                    output.write(',');
+                    output.space();
+                }
+
+                write(output, writtenRefs, args.get(i));
             }
 
-            write(output, writtenRefs, args.get(i));
+            output.write(')');
         }
+        else {
+            write(output, writtenRefs, args.get(0));
+        }
+    }
 
-        output.write(')');
-}
-
-    private static void writeReference(StoneCharOutput output, String reference) throws IOException {
+    private static void writeReference(StoneCharOutput output, String reference) {
         output.write('<');
         writeString(output, reference);
         output.write('>');
     }
 
-    private static void writeChar(char value, StoneCharOutput output) throws IOException {
-        output.write('"');
-
-        writeUnquotedChar(value, output);
-
-        output.write('"');
+    private static void writeChar(char value, StoneCharOutput output, boolean wrap) {
+        if (wrap) {
+            output.write("(\"");
+            writeUnquotedChar(value, output);
+            output.write("\")");
+        }
+        else {
+            output.write('"');
+            writeUnquotedChar(value, output);
+            output.write('"');
+        }
     }
 
-    private static void writeNumber(Number value, StoneCharOutput output) throws IOException {
-        output.write(String.valueOf(value));
+    private static void writeNumber(Number value, StoneCharOutput output, boolean wrap) {
+        var code = String.valueOf(value);
+        if (wrap) {
+            output.write('(');
+            output.write(code);
+            output.write(')');
+        }
+        else {
+            output.write(code);
+        }
     }
 
-    private static void writeBoolean(boolean value, StoneCharOutput output) throws IOException {
-        output.write(value ? "true" : "false");
+    private static void writeBoolean(boolean value, StoneCharOutput output, boolean wrap) {
+        if (wrap) {
+            output.write(value ? "(true)" : "(false)");
+        }
+        else {
+            output.write(value ? "true" : "false");
+        }
     }
 
-    private static void writeString(StoneCharOutput output, String value) throws IOException {
+    private static void writeString(StoneCharOutput output, String value, boolean wrap) {
+        if (wrap) {
+            output.write('(');
+            writeString(output, value);
+            output.write(')');
+        }
+        else {
+            writeString(output, value);
+        }
+    }
+
+    private static void writeString(StoneCharOutput output, String value) {
         if (value.matches("[a-zA-Z0-9_./+-]+")) {
             output.write(value);
         }
@@ -273,11 +370,16 @@ public class StoneTextEncoder implements StoneCharEncoder {
         }
     }
 
-    private static void writeNull(StoneCharOutput output) throws IOException {
-        output.write("null");
+    private static void writeNull(StoneCharOutput output, boolean wrap) {
+        if (wrap) {
+            output.write("(null)");
+        }
+        else {
+            output.write("null");
+        }
     }
 
-    private static void writeUnquotedChar(Character chr, StoneCharOutput output) throws IOException {
+    private static void writeUnquotedChar(Character chr, StoneCharOutput output) {
         if (chr == '\"' || chr == '\\') {
             output.write('\\');
             output.write(chr);
@@ -295,13 +397,5 @@ public class StoneTextEncoder implements StoneCharEncoder {
         else {
             output.write(chr);
         }
-    }
-
-    public boolean isSkipNullFields() {
-        return skipNullFields;
-    }
-
-    public void setSkipNullFields(boolean skipNullFields) {
-        this.skipNullFields = skipNullFields;
     }
 }

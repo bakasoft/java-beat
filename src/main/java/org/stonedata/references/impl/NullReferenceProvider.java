@@ -9,7 +9,7 @@ public class NullReferenceProvider implements ReferenceProvider {
     private NullReferenceProvider() {}
 
     @Override
-    public String getReference(String typeName, Object value) {
+    public String getReference(Object value) {
         return null;
     }
 }

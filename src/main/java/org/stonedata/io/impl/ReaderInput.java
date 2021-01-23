@@ -1,5 +1,6 @@
 package org.stonedata.io.impl;
 
+import org.stonedata.errors.StoneException;
 import org.stonedata.io.StoneCharInput;
 import org.stonedata.io.TextLocation;
 
@@ -24,9 +25,16 @@ public class ReaderInput implements StoneCharInput {
         this.reader = reader;
     }
 
-    private Character load() throws IOException {
+    private Character load() {
         if (buffer == null) {
-            var c = reader.read();
+            int c;
+
+            try {
+                c = reader.read();
+            }
+            catch (IOException e) {
+                throw new StoneException(e);
+            }
 
             if (c == -1) {
                 return null;
@@ -46,16 +54,16 @@ public class ReaderInput implements StoneCharInput {
     }
 
     @Override
-    public boolean isAlive() throws IOException {
+    public boolean isAlive() {
         return load() != null;
     }
 
     @Override
-    public char pull() throws IOException {
+    public char pull() {
         var c = load();
 
         if (c == null) {
-            throw new IOException();
+            throw new StoneException();
         }
 
         buffer = null;
@@ -64,11 +72,11 @@ public class ReaderInput implements StoneCharInput {
     }
 
     @Override
-    public char peek() throws IOException {
+    public char peek() {
         var c = load();
 
         if (c == null) {
-            throw new IOException();
+            throw new StoneException();
         }
 
         return c;

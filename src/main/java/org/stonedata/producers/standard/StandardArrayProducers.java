@@ -2,7 +2,10 @@ package org.stonedata.producers.standard;
 
 import org.stonedata.producers.ArrayProducer;
 import org.stonedata.producers.standard.array.ClassListProducer;
+import org.stonedata.producers.standard.array.DefaultListProducer;
+import org.stonedata.producers.standard.array.DefaultTypedListProducer;
 import org.stonedata.producers.standard.array.HardTypedListProducer;
+import org.stonedata.util.ReflectUtils;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -12,9 +15,13 @@ public class StandardArrayProducers {
 
     private StandardArrayProducers() {}
 
-    public static ArrayProducer tryCreate(Type type) {
-        if (type instanceof ParameterizedType) {
-            var pType = (ParameterizedType)type;
+    public static ArrayProducer create(Type typeHint) {
+        return create(null, typeHint, false);
+    }
+
+    public static ArrayProducer create(String typeName, Type typeHint, boolean useCleanDefaultTypes) {
+        if (typeHint instanceof ParameterizedType) {
+            var pType = (ParameterizedType)typeHint;
             var pArgs = pType.getActualTypeArguments();
 
             if (pType.getRawType() instanceof Class && pArgs.length == 1) {
@@ -27,16 +34,18 @@ public class StandardArrayProducers {
                 }
             }
         }
-        else if (type instanceof Class) {
-            var typeClass = (Class<?>) type;
+        else if (typeHint instanceof Class) {
+            var typeClass = (Class<?>) typeHint;
 
-            if (List.class.isAssignableFrom(typeClass)) {
+            if (List.class.isAssignableFrom(typeClass) && ReflectUtils.canInstantiate(typeClass)) {
                 return new ClassListProducer(typeClass);
             }
+            // TODO add array classes case
         }
 
-        // TODO Detect Array Classes, Generic Arrays, Sets, etc.
-
-        return null;
+        if (typeName == null || useCleanDefaultTypes) {
+            return new DefaultListProducer();
+        }
+        return new DefaultTypedListProducer(typeName);
     }
 }

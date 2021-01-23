@@ -4,335 +4,304 @@ import org.junit.jupiter.api.Test;
 import org.stonedata.errors.CyclicDocumentException;
 import org.stonedata.errors.UnsupportedValueException;
 import org.stonedata.examiners.Examiner;
-import org.stonedata.examiners.ValueExaminer;
+import org.stonedata.examiners.Examiners;
+import org.stonedata.examiners.standard.array.ArrayInstanceExaminer;
 import org.stonedata.examiners.standard.array.ListExaminer;
 import org.stonedata.examiners.standard.object.ClassObjectExaminer;
 import org.stonedata.examiners.standard.object.MapExaminer;
-import org.stonedata.examiners.standard.value.DurationExaminer;
-import org.stonedata.io.impl.AppendableOutput;
-import org.stonedata.io.impl.NullOutput;
+import org.stonedata.examiners.standard.value.DefaultTypedValueExaminer;
+import org.stonedata.examiners.standard.value.ValueIdentityExaminer;
 import org.stonedata.references.ReferenceProvider;
-import org.stonedata.references.impl.NullReferenceProvider;
 import org.stonedata.references.impl.StandardReferenceProvider;
-import org.stonedata.repositories.ExaminerRepository;
-import org.stonedata.repositories.standard.NullExaminerRepository;
 import org.stonedata.repositories.standard.StandardExaminerRepository;
+import org.stonedata.types.array.DefaultTypedListImpl;
+import org.stonedata.types.object.DefaultTypedObjectImpl;
+import org.stonedata.types.value.DefaultTypedValueImpl;
 
-import java.io.IOException;
-import java.time.Duration;
-import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+import static util.CustomAssertions.assertContains;
 import static util.CustomAssertions.assertException;
 
 class StoneTextEncoderTest {
 
-    public static class CyclicNode {
-        public CyclicNode inner;
+    public static class CyclicNode { public CyclicNode inner; }
+
+    @Test
+    void testSearchCustomExaminer() {
+        var repository = new StandardExaminerRepository()
+                .register(Examiners.value(Object::toString), Class.class);
+        var encoder = new StoneTextEncoder(repository);
+        var value = List.class;
+        var text = encoder.write(value);
+
+        assertEquals("\"interface java.util.List\"", text);
     }
 
     @Test
-    void testWriteNull() {
-        var encoder = buildEncoder();
-        var text = write(encoder, null);
+    void testSearchDefaultAtomicExaminers() {
+        var encoder = new StoneTextEncoder();
 
-        assertEquals("null", text);
+        // null
+        assertEquals("null", encoder.write(null));
+
+        // String / Character
+        assertEquals("\"!@#\"", encoder.write("!@#"));
+        assertEquals("\"?\"", encoder.write('?'));
+
+        // Boolean
+        assertEquals("true", encoder.write(true));
+        assertEquals("false", encoder.write(false));
+
+        // Number
+        assertEquals("1", encoder.write(1));
+        assertEquals("1.5", encoder.write(1.5));
     }
 
     @Test
-    void testWriteTrue() {
-        var encoder = buildEncoder();
-        var text = write(encoder, true);
+    void testSearchDefaultTypedExaminers() {
+        var encoder = new StoneTextEncoder();
 
-        assertEquals("true", text);
+        // DefaultTypedObject
+        assertEquals("T{}", encoder.write(new DefaultTypedObjectImpl("T")));
+        assertEquals("{}", encoder.write(new DefaultTypedObjectImpl()));
+
+        // DefaultTypedList
+        assertEquals("T[]", encoder.write(new DefaultTypedListImpl("T")));
+        assertEquals("[]", encoder.write(new DefaultTypedListImpl()));
+
+        // DefaultTypedValue
+        assertEquals("T()", encoder.write(new DefaultTypedValueImpl("T")));
+        assertEquals("()", encoder.write(new DefaultTypedValueImpl()));
     }
 
     @Test
-    void testWriteFalse() {
-        var encoder = buildEncoder();
-        var text = write(encoder, true);
+    void testSearchDefaultUntypedExaminers() {
+        var encoder = new StoneTextEncoder();
 
-        assertEquals("true", text);
+        // Map
+        assertEquals("{}", encoder.write(Map.of()));
+
+        // List
+        assertEquals("[]", encoder.write(List.of()));
     }
 
     @Test
-    void testWriteString() {
-        var encoder = buildEncoder();
-        var text = write(encoder, "abc");
+    void testSearchDefaultExaminersByClass() {
+        var encoder = new StoneTextEncoder();
 
-        assertEquals("abc", text);
+        // Array
+        assertEquals("[1,2,3]", encoder.write(new int[]{1,2,3}));
+
+        // Enum
+        assertEquals("HOURS", encoder.write(TimeUnit.HOURS));
+
+        // Other
+        assertEquals("{}", encoder.write(new Object()));
     }
 
     @Test
-    void testWriteStringEscaped() {
-        var encoder = buildEncoder();
-        var text = write(encoder, "\t\r\n\"");
+    void testWriteContent() {
+        var encoder = new StoneTextEncoder();
 
-        assertEquals("\"\\t\\r\\n\\\"\"", text);
+        assertEquals("{}", encoder.write(new Object()));
+        assertEquals("[]", encoder.write(new Object[0]));
+        assertEquals("0", encoder.write(0));
     }
 
     @Test
-    void testWriteNumber() {
-        var encoder = buildEncoder();
-        var text = write(encoder, 123);
+    void testUnsupportedExaminer() {
+        Examiner invalidExaminer = (() -> null);
 
-        assertEquals("123", text);
-    }
-
-    @Test
-    void testWriteChar() {
-        var encoder = buildEncoder();
-        var text = write(encoder, 'x');
-
-        assertEquals("\"x\"", text);
-    }
-
-    @Test
-    void testWriteUnsupportedValue() {
-        var encoder = buildEncoder();
-
-        assertException(
+        var repository = new StandardExaminerRepository()
+                .register(invalidExaminer, Object.class);
+        var encoder = new StoneTextEncoder(repository);
+        var e = assertException(
                 UnsupportedValueException.class,
-                () -> write(encoder, new Object()));
+                () -> encoder.write(new Object()));
+
+        assertContains(invalidExaminer.getClass().getName(), e.getMessage());
     }
 
     @Test
-    void testWriteStandardValueWithReference() {
-        var references = new StandardReferenceProvider();
-        var someValue = "SomeValue";
-
-        references.setReference(null, someValue, "REF");
-
-        var encoder = buildEncoder(references);
-        var text = write(encoder, someValue);
-
-        assertEquals("<REF>(SomeValue)", text);
-    }
-
-    @Test
-    void testWriteEmptyObject() {
-        var map = Map.of();
+    void testWriteTypeAndContent() {
         var repository = new StandardExaminerRepository();
+        var encoder = new StoneTextEncoder(repository);
 
-        repository.registerForValue(new MapExaminer(null), map);
+        repository.register(new MapExaminer("T"), Map.class);
+        repository.register(new ListExaminer("U"), List.class);
+        repository.register(new DefaultTypedValueExaminer("V"), Integer.class);
 
-        var encoder = buildEncoder(repository);
-        var text = write(encoder, map);
-
-        assertEquals("{}", text);
+        assertEquals("T{}", encoder.write(Map.of()));
+        assertEquals("U[]", encoder.write(List.of()));
+        assertEquals("V(0)", encoder.write(0));
     }
 
     @Test
-    void testSkipNullFields() {
-        var map = new HashMap<String, Object>();
-        map.put("a", 1);
-        map.put("b", null);
-        map.put("c", 2);
-        var repository = new StandardExaminerRepository();
-
-        repository.registerForValue(new MapExaminer(null), map);
-
-        var encoder = buildEncoder(repository);
-        encoder.setSkipNullFields(true);
-
-        assertTrue(encoder.isSkipNullFields());
-
-        var text = write(encoder, map);
-
-        assertEquals("{a:1,c:2}", text);
-    }
-
-    @Test
-    void testWriteNamedMap() {
-        var map = Map.of("k1", "v1");
-        var repository = new StandardExaminerRepository();
-
-        repository.registerForValue(new MapExaminer("Map"), map);
-
-        var encoder = buildEncoder(repository);
-        var text = write(encoder, map);
-
-        assertEquals("Map{k1:v1}", text);
-    }
-
-    @Test
-    void testWriteUnnamedMap() {
-        var map = Map.of("k1", "v1");
-        var repository = new StandardExaminerRepository();
-
-        repository.registerForValue(new MapExaminer(null), map);
-
-        var encoder = buildEncoder(repository);
-        var text = write(encoder, map);
-
-        assertEquals("{k1:v1}", text);
-    }
-
-    @Test
-    void testWriteNamedMapWithRef() {
+    void testWriteTypeReferenceAndContent() {
         var repository = new StandardExaminerRepository();
         var references = new StandardReferenceProvider();
-        var map = Map.of("k1", "v1");
-
-        repository.registerForValue(new MapExaminer("Map"), map);
-        references.setReference("Map", map, "1");
-
         var encoder = new StoneTextEncoder(repository, references);
-        var text = write(encoder, map);
 
-        assertEquals("Map<1>{k1:v1}", text);
+        repository.register(new MapExaminer("T"), Map.class);
+        repository.register(new ArrayInstanceExaminer("U"), Object[].class);
+        repository.register(new DefaultTypedValueExaminer("V"), Integer.class);
+
+        var someObject = Map.of();
+        var someArray = new Object[0];
+        var someValue = 0;
+
+        references.setReference(someObject, "1");
+        references.setReference(someArray, "2");
+        references.setReference(someValue, "3");
+
+        assertEquals("[T<1>{},<1>]", encoder.write(List.of(someObject, someObject)));
+        assertEquals("[U<2>[],<2>]", encoder.write(List.of(someArray, someArray)));
+        assertEquals("[V<3>(0),<3>]", encoder.write(List.of(someValue, someValue)));
     }
 
     @Test
-    void testWriteUnnamedMapWithRef() {
-        var repository = new StandardExaminerRepository();
+    void testWriteReferenceAndContent() {
         var references = new StandardReferenceProvider();
-        var map = Map.of("k1", "v1");
+        var encoder = new StoneTextEncoder(references);
 
-        repository.registerForValue(new MapExaminer(null), map);
-        references.setReference(null, map, "1");
+        var someObject = new Object();
+        var someArray = new Object[0];
+        var someValue = 0;
 
-        var encoder = new StoneTextEncoder(repository, references);
-        var text = write(encoder, map);
+        references.setReference(someObject, "1");
+        references.setReference(someArray, "2");
+        references.setReference(someValue, "3");
 
-        assertEquals("<1>{k1:v1}", text);
+        assertEquals("[<1>{},<1>]", encoder.write(List.of(someObject, someObject)));
+        assertEquals("[<2>[],<2>]", encoder.write(List.of(someArray, someArray)));
+        assertEquals("[<3>(0),<3>]", encoder.write(List.of(someValue, someValue)));
     }
 
     @Test
     void testCyclicException() {
-        var repository = new StandardExaminerRepository();
-        repository.registerForCondition(
-                new ClassObjectExaminer(CyclicNode.class, "Node"),
-                value -> value instanceof CyclicNode);
-
-        var encoder = buildEncoder(repository);
         var node = new CyclicNode();
-
         node.inner = node;
 
-        assertException(
+        var repository = new StandardExaminerRepository();
+        repository.register(
+                new ClassObjectExaminer(CyclicNode.class),
+                CyclicNode.class
+        );
+
+        var encoder = new StoneTextEncoder(repository);
+        var e = assertException(
                 CyclicDocumentException.class,
-                () -> encoder.write(new NullOutput(), node));
+                () -> encoder.write(node));
+
+        assertContains(CyclicNode.class.getName(), e.getMessage());
+    }
+
+    @Test
+    void testWriteObject() {
+        var encoder = new StoneTextEncoder();
+
+        var mapEmpty = Map.of();
+        var mapSingleKey = Map.of("a", 1);
+
+        var mapSortedKeys = new LinkedHashMap<>();
+        mapSortedKeys.put("a", 1);
+        mapSortedKeys.put("b", 2);
+
+        var mapWithNull = new HashMap<>();
+        mapWithNull.put("x", null);
+
+        assertEquals("{}", encoder.write(mapEmpty));
+        assertEquals("{a:1}", encoder.write(mapSingleKey));
+        assertEquals("{a:1,b:2}", encoder.write(mapSortedKeys));
+        assertEquals("{x:null}", encoder.write(mapWithNull));
+    }
+
+    @Test
+    void testWriteObjectWithSkipNullFields() {
+        var encoder = new StoneTextEncoder();
+        encoder.setSkipNullFields(true);
+
+        var mapWithNull = new LinkedHashMap<String, Object>();
+        mapWithNull.put("a", 1);
+        mapWithNull.put("b", null);
+        mapWithNull.put("c", 2);
+
+        assertTrue(encoder.isSkipNullFields());
+        assertEquals("{a:1,c:2}", encoder.write(mapWithNull));
     }
 
     @Test
     void testWriteArray() {
-        var repository = new StandardExaminerRepository();
-        repository.registerForCondition(
-                new ListExaminer("List"),
-                value -> value instanceof List);
+        var encoder = new StoneTextEncoder();
 
-        var encoder = buildEncoder(repository);
+        var listEmpty = List.of();
+        var listMultiItems = List.of(1, 2, 3);
 
-        var text = write(encoder, List.of(1, 2, 3));
-
-        assertEquals("List[1,2,3]", text);
+        assertEquals("[]", encoder.write(listEmpty));
+        assertEquals("[1,2,3]", encoder.write(listMultiItems));
     }
 
     @Test
-    void testWriteEmptyArray() {
+    void testUnsupportedValue() {
         var repository = new StandardExaminerRepository();
-        repository.registerForCondition(
-                new ListExaminer("List"),
-                value -> value instanceof List);
+        var encoder = new StoneTextEncoder(repository);
+        repository.register(ValueIdentityExaminer.INSTANCE, Object.class);
 
-        var encoder = buildEncoder(repository);
-
-        var text = write(encoder, List.of());
-
-        assertEquals("List[]", text);
-    }
-
-    @Test
-    void testWriteValue() {
-        var repository = new StandardExaminerRepository();
-        repository.registerForCondition(
-                new DurationExaminer("Duration"),
-                value -> value instanceof Duration);
-
-        var encoder = buildEncoder(repository);
-
-        var text = write(encoder, Duration.of(1, ChronoUnit.SECONDS));
-
-        assertEquals("Duration(PT1S)", text);
-    }
-
-    @Test
-    void testWriteMultiValue() {
-        class Point {
-            public int x, y;
-        }
-        var pointExaminer = new ValueExaminer() {
-
-            @Override
-            public List<Object> computeArguments(Object value) {
-                var p = (Point)value;
-                return List.of(p.x, p.y);
-            }
-
-            @Override
-            public String getType() {
-                return "Point";
-            }
-        };
-        var repository = new StandardExaminerRepository();
-        repository.registerForCondition(
-                pointExaminer,
-                value -> value instanceof Point);
-
-        var encoder = buildEncoder(repository);
-        var point = new Point();
-        var text = write(encoder, point);
-
-        assertEquals("Point(0,0)", text);
-    }
-
-    @Test
-    void testInvalidExaminer() {
-        var repository = new StandardExaminerRepository();
-        repository.registerForCondition(
-                () -> "Dummy",
-                value -> true);
-
-        var encoder = buildEncoder(repository);
-
-        assertException(
+        var e = assertException(
                 UnsupportedValueException.class,
-                () -> write(encoder, 1));
+                () -> encoder.write(new Object()));
+
+        assertContains(Object.class.getName(), e.getMessage());
     }
 
-    private static StoneTextEncoder buildEncoder() {
-        var repository = NullExaminerRepository.INSTANCE;
-        var references = NullReferenceProvider.INSTANCE;
-        return new StoneTextEncoder(repository, references);
+    @Test
+    void testWriteAtomicValues() {
+        var encoder = new StoneTextEncoder();
+
+        assertEquals("null", encoder.write(null));
+        assertEquals("true", encoder.write(true));
+        assertEquals("false", encoder.write(false));
+        assertEquals("abc", encoder.write("abc"));
+        assertEquals("\"x\"", encoder.write('x'));
     }
 
-    private static StoneTextEncoder buildEncoder(ExaminerRepository repository) {
-        var references = NullReferenceProvider.INSTANCE;
-        return new StoneTextEncoder(repository, references);
+    @Test
+    void testWriteAtomicValuesWrapped() {
+        var encoder = new StoneTextEncoder((ReferenceProvider)(value -> "1"));
+
+        assertEquals("<1>(null)", encoder.write(null));
+        assertEquals("<1>(true)", encoder.write(true));
+        assertEquals("<1>(false)", encoder.write(false));
+        assertEquals("<1>(abc)", encoder.write("abc"));
+        assertEquals("<1>(\"x\")", encoder.write('x'));
     }
 
-    private static StoneTextEncoder buildEncoder(ReferenceProvider references) {
-        var examiners = NullExaminerRepository.INSTANCE;
-        return new StoneTextEncoder(examiners, references);
+    @Test
+    void testWriteArguments() {
+        var repository = new StandardExaminerRepository();
+        var encoder = new StoneTextEncoder(repository);
+        repository.register(ValueIdentityExaminer.INSTANCE, List.class);
+
+        assertEquals("()", encoder.write(List.of()));
+        assertEquals("1", encoder.write(List.of(1)));
+        assertEquals("(1,2)", encoder.write(List.of(1,2)));
+        assertEquals("(1,2,3)", encoder.write(List.of(1,2,3)));
     }
 
-    private static String write(StoneTextEncoder encoder, Object value) {
-        var buffer = new StringBuilder();
-        var output = new AppendableOutput(buffer);
+    @Test
+    void testEscapedChars() {
+        var encoder = new StoneTextEncoder();
+        var text = encoder.write("\t\r\n\"");
 
-        try {
-            encoder.write(output, value);
-        }
-        catch (IOException e) {
-            throw new AssertionError(e);
-        }
-
-        return buffer.toString();
+        assertEquals("\"\\t\\r\\n\\\"\"", text);
     }
 
 }

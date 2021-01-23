@@ -1,5 +1,6 @@
 package org.stonedata.io.impl;
 
+import org.stonedata.errors.StoneException;
 import org.stonedata.io.StoneCharOutput;
 
 import java.io.IOException;
@@ -13,27 +14,37 @@ public class AppendableOutput implements StoneCharOutput {
     }
 
     @Override
-    public void write(char value) throws IOException {
-        output.append(value);
+    public void write(char value) {
+        try {
+            output.append(value);
+        }
+        catch (IOException e) {
+            throw new StoneException(e);
+        }
     }
 
     @Override
-    public void write(CharSequence value) throws IOException {
-        output.append(value);
+    public void write(CharSequence value) {
+        try {
+            output.append(value);
+        }
+        catch (IOException e) {
+            throw new StoneException(e);
+        }
     }
 
     @Override
-    public void space() throws IOException {
+    public void space() {
         // do nothing
     }
 
     @Override
-    public void line() throws IOException {
+    public void line() {
         // do nothing
     }
 
     @Override
-    public void indent(int delta) throws IOException {
+    public void indent(int delta) {
         // do nothing
     }
 }

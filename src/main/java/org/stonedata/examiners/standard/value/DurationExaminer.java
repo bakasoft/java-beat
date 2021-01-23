@@ -7,7 +7,13 @@ import java.util.List;
 
 public class DurationExaminer implements ValueExaminer {
 
+    public static final DurationExaminer ANONYMOUS_INSTANCE = new DurationExaminer(null);
+
     private final String type;
+
+    public DurationExaminer() {
+        this(null);
+    }
 
     public DurationExaminer(String type) {
         this.type = type;
@@ -19,9 +25,9 @@ public class DurationExaminer implements ValueExaminer {
     }
 
     @Override
-    public List<Object> computeArguments(Object value) {
+    public Object extractArgument(Object value) {
         var duration = (Duration)value;
 
-        return List.of(duration.toString());
+        return duration.toString();
     }
 }

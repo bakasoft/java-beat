@@ -1,7 +1,7 @@
 package org.stonedata.references;
 
 public interface ReferenceTracker {
-    Object retrieve(String typeName, String reference);
+    Object retrieve(String reference);
 
-    void store(String typeName, Object value, String reference);
+    void store(String reference, Object value);
 }

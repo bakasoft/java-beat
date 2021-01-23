@@ -4,16 +4,14 @@ import org.stonedata.errors.StoneException;
 import org.stonedata.producers.ValueProducer;
 import org.stonedata.util.ReflectUtils;
 
-import java.util.List;
-
 public class IntegerProducer implements ValueProducer {
     @Override
-    public Object newInstance(List<?> arguments) {
-        if (arguments.isEmpty()) {
+    public Object newInstance(Object[] arguments) {
+        if (arguments.length == 0) {
             return 0;
         }
-        else if (arguments.size() == 1) {
-            return ReflectUtils.convertTo(arguments.get(0), Integer.class);
+        else if (arguments.length == 1) {
+            return ReflectUtils.convertTo(arguments[0], Integer.class);
         }
         else {
             throw new StoneException("Expected one argument of an integer.");
