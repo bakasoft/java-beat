@@ -9,7 +9,7 @@ import java.util.function.UnaryOperator;
 
 public class Examiners {
 
-    public Examiners() {}
+    private Examiners() {}
 
     public static <T> ValueExaminer value(Class<T> type, Function<T, Object> fn) {
         return value(type, ReflectUtils.computeDefaultTypeName(type), fn);

@@ -6,7 +6,7 @@ import org.stonedata.references.ReferenceTracker;
 import java.util.HashMap;
 import java.util.Map;
 
-public class DefaultReferenceTracker implements ReferenceTracker {
+public class StandardReferenceTracker implements ReferenceTracker {
 
     private Map<String, Object> referenceValues;
 

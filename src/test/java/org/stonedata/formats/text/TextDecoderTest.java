@@ -7,7 +7,7 @@ import org.stonedata.producers.ValueProducer;
 import org.stonedata.producers.standard.array.ClassListProducer;
 import org.stonedata.producers.standard.object.ClassObjectProducer;
 import org.stonedata.producers.standard.value.DurationProducer;
-import org.stonedata.references.impl.DefaultReferenceTracker;
+import org.stonedata.references.impl.StandardReferenceTracker;
 import org.stonedata.repositories.standard.StandardProducerRepository;
 import org.stonedata.types.DefaultTypedList;
 import org.stonedata.types.DefaultTypedObject;
@@ -44,7 +44,7 @@ class TextDecoderTest {
 
     @Test
     void testGetReference() {
-        var references = new DefaultReferenceTracker();
+        var references = new StandardReferenceTracker();
         var value = new Object();
         references.store("1", value);
 
@@ -56,7 +56,7 @@ class TextDecoderTest {
 
     @Test
     void testPutReference() {
-        var references = new DefaultReferenceTracker();
+        var references = new StandardReferenceTracker();
         var decoder = new TextDecoder(references);
         var obj = decoder.read("<1>{}");
         var arr = decoder.read("<2>[]");
@@ -219,24 +219,6 @@ class TextDecoderTest {
     }
 
     @Test
-    void testInvalidSyntax() {
-        var decoder = new TextDecoder();
-
-        assertException(
-                InvalidSyntaxException.class,
-                () -> decoder.read("???"));
-    }
-
-    @Test
-    void testInvalidSyntaxTypeReferenceNoContent() {
-        var decoder = new TextDecoder();
-
-        assertException(
-                InvalidSyntaxException.class,
-                () -> decoder.read("T<1>"));
-    }
-
-    @Test
     void testStringEscapedChars() {
         var decoder = new TextDecoder();
         var entries = Map.of(
@@ -269,12 +251,19 @@ class TextDecoderTest {
     }
 
     @Test
-    void testInvalidReference() {
+    void testInvalidSyntax() {
         var decoder = new TextDecoder();
+        var cases = List.of(
+                "???",
+                "T<1>",
+                "<>(value)"
+        );
 
-        assertException(
-                InvalidSyntaxException.class,
-                () -> decoder.read("<>(value)"));
+        for (var text : cases) {
+            assertException(
+                    InvalidSyntaxException.class,
+                    () -> decoder.read(text));
+        }
     }
 
 }

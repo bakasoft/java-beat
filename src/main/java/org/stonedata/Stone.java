@@ -4,8 +4,6 @@ import org.stonedata.formats.text.TextDecoder;
 import org.stonedata.io.CharInput;
 import org.stonedata.io.standard.*;
 import org.stonedata.formats.text.TextEncoder;
-import org.stonedata.references.impl.DefaultReferenceTracker;
-import org.stonedata.references.impl.StandardReferenceProvider;
 import org.stonedata.repositories.ExaminerRepository;
 import org.stonedata.repositories.ProducerRepository;
 

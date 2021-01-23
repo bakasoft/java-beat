@@ -2,6 +2,8 @@ package org.stonedata.util;
 
 public class PP {
 
+    private PP() {}
+
     public static String str(char c) {
         return str(String.valueOf(c));
     }

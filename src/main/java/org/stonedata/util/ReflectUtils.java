@@ -10,6 +10,9 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class ReflectUtils {
+
+    private ReflectUtils() {}
+
     public static <T> Supplier<T> extractEmptyConstructor(Class<?> typeClass, Class<T> resultClass) {
         if (!resultClass.isAssignableFrom(typeClass)) {
             throw new StoneException();
@@ -99,15 +102,5 @@ public class ReflectUtils {
     public static boolean isCompatible(Object value, Class<?> type) {
         return type.isInstance(value)
                 || type == boolean.class && value instanceof Boolean;
-    }
-
-    public static <T> Supplier<T> emptyConstructor(Class<T> type) {
-        return () -> {
-            try {
-                return type.getConstructor().newInstance();
-            } catch (InstantiationException | InvocationTargetException | NoSuchMethodException | IllegalAccessException e) {
-                throw new RuntimeException();
-            }
-        };
     }
 }

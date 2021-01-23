@@ -10,7 +10,7 @@ import org.stonedata.producers.standard.StandardArrayProducers;
 import org.stonedata.producers.standard.StandardObjectProducers;
 import org.stonedata.producers.standard.StandardValueProducers;
 import org.stonedata.references.ReferenceTracker;
-import org.stonedata.references.impl.DefaultReferenceTracker;
+import org.stonedata.references.impl.StandardReferenceTracker;
 import org.stonedata.repositories.ProducerRepository;
 import org.stonedata.util.PP;
 
@@ -40,7 +40,7 @@ public class TextDecoder {
     }
 
     public TextDecoder(ProducerRepository producers, ReferenceTracker references) {
-        this.references = (references != null ? references : new DefaultReferenceTracker());
+        this.references = (references != null ? references : new StandardReferenceTracker());
         this.producers = producers;
     }
 

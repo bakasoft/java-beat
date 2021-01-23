@@ -5,16 +5,14 @@ import org.stonedata.formats.text.TextEncoder;
 import org.stonedata.io.standard.AppendableOutput;
 import org.stonedata.io.standard.SequenceInput;
 import org.stonedata.references.impl.StandardReferenceProvider;
-import org.stonedata.references.impl.DefaultReferenceTracker;
-
-import java.io.IOException;
+import org.stonedata.references.impl.StandardReferenceTracker;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SampleUtils {
 
     private static Object decode(String text) {
-        var decoder = new TextDecoder(new DefaultReferenceTracker());
+        var decoder = new TextDecoder(new StandardReferenceTracker());
 
         return decoder.read(new SequenceInput(text));
     }
