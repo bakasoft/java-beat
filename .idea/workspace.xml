@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="4a1f34b1-d7d2-4294-99e7-85492e654ef7" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/stone.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/jarRepositories.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/jarRepositories.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CONTRIBUTING.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build.gradle" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.jar" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.properties" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gradlew" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gradlew.bat" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/settings.gradle" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/stonedata/Stone.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/stonedata/StoneBuilder.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/stonedata/errors/ConversionException.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/stonedata/errors/CyclicDocumentException.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/stonedata/errors/DuplicateKeyException.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/stonedata/errors/ExaminerNotFoundException.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/stonedata/errors/InvalidSyntaxException.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/stonedata/errors/MissingInputException.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/stonedata/errors/ProducerNotFoundException.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/stonedata/errors/StoneException.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/stonedata/errors/UnknownReferenceException.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/stonedata/errors/UnsupportedValueException.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/stonedata/errors/WriterNotFoundException.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/stonedata/examiners/ArrayExaminer.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/stonedata/examiners/Examiner.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/stonedata/examiners/Examiners.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/stonedata/examiners/ObjectExaminer.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/stonedata/examiners/ValueExaminer.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/stonedata/examiners/standard/StandardExaminers.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/stonedata/examiners/standard/array/ArrayInstanceExaminer.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/stonedata/examiners/standard/array/ListExaminer.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/stonedata/examiners/standard/object/ClassObjectExaminer.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/stonedata/examiners/standard/object/MapExaminer.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/stonedata/examiners/standard/value/ClassEnumExaminer.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/stonedata/examiners/standard/value/DefaultTypedValueExaminer.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/stonedata/examiners/standard/value/DurationExaminer.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/stonedata/examiners/standard/value/ValueIdentityExaminer.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/stonedata/formats/text/TextDecoder.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/stonedata/formats/text/TextEncoder.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/stonedata/io/CharInput.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/stonedata/io/CharOutput.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/stonedata/io/TextLocation.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/stonedata/io/standard/AppendableOutput.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/stonedata/io/standard/PrettyPrintOutput.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/stonedata/io/standard/ReaderInput.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/stonedata/io/standard/SequenceInput.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/stonedata/producers/ArrayProducer.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/stonedata/producers/ObjectProducer.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/stonedata/producers/Producer.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/stonedata/producers/ValueProducer.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/stonedata/producers/standard/StandardArrayProducers.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/stonedata/producers/standard/StandardObjectProducers.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/stonedata/producers/standard/StandardValueProducers.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/stonedata/producers/standard/array/ClassListProducer.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/stonedata/producers/standard/array/DefaultListProducer.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/stonedata/producers/standard/array/DefaultTypedListProducer.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/stonedata/producers/standard/array/HardTypedListProducer.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/stonedata/producers/standard/object/ClassMapProducer.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/stonedata/producers/standard/object/ClassObjectProducer.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/stonedata/producers/standard/object/DefaultObjectProducer.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/stonedata/producers/standard/object/DefaultTypedObjectProducer.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/stonedata/producers/standard/object/MapObjectProducer.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/stonedata/producers/standard/value/ClassEnumProducer.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/stonedata/producers/standard/value/DefaultTypedValueProducer.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/stonedata/producers/standard/value/DefaultValueProducer.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/stonedata/producers/standard/value/DurationProducer.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/stonedata/producers/standard/value/IntegerProducer.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/stonedata/references/ReferenceProvider.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/stonedata/references/ReferenceTracker.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/stonedata/references/impl/StandardReferenceProvider.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/stonedata/references/impl/StandardReferenceTracker.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/stonedata/repositories/ExaminerRepository.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/stonedata/repositories/ProducerRepository.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/stonedata/repositories/standard/StandardExaminerRepository.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/stonedata/repositories/standard/StandardProducerRepository.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/stonedata/types/DefaultList.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/stonedata/types/DefaultObject.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/stonedata/types/DefaultTypedList.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/stonedata/types/DefaultTypedObject.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/stonedata/types/DefaultTypedValue.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/stonedata/types/DefaultValue.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/stonedata/types/standard/DefaultListImpl.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/stonedata/types/standard/DefaultObjectImpl.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/stonedata/types/standard/DefaultTypedListImpl.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/stonedata/types/standard/DefaultTypedObjectImpl.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/stonedata/types/standard/DefaultTypedValueImpl.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/stonedata/types/standard/DefaultValueImpl.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/stonedata/util/PP.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/stonedata/util/ReflectUtils.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/stonedata/util/StringUtils.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/stonedata/util/Validations.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/org/stonedata/formats/text/TextDecoderTest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/org/stonedata/formats/text/TextEncoderTest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/sample0/Sample0Test.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/sample0/types/Artist.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/sample0/types/Medium.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/sample0/types/Release.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/sample0/types/Song.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/sample1/Sample1Test.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/sample1/types/Button.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/sample1/types/Label.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/sample1/types/Layout.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/sample1/types/Panel.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/sample1/types/Text.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/sample1/types/Widget.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/sample2/Sample2Test.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/sample2/types/Document.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/sample2/types/Node.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/sample2/types/Point.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/sample2/types/Rectangle.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/util/CustomAssertions.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/util/SampleUtils.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/util/TestUtils.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/resources/sample0.st" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/resources/sample1.st" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/resources/sample2.st" beforeDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectId" id="1nUnJu5UxYl28i2sSoUndK0ksQf" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="1" id="Add" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
+    <property name="project.structure.last.edited" value="Modules" />
+    <property name="project.structure.proportion" value="0.0" />
+    <property name="project.structure.side.proportion" value="0.0" />
+  </component>
+  <component name="RunManager" selected="JUnit.All in stone">
+    <configuration name="All in stone" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="stone" />
+      <option name="PACKAGE_NAME" value="" />
+      <option name="TEST_OBJECT" value="package" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="TestX.test" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="stone" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="test.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="test" />
+      <option name="MAIN_CLASS_NAME" value="test.TestX" />
+      <option name="METHOD_NAME" value="test" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="TextDecoderTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="stone" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="org.stonedata.formats.text.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="org.stonedata.formats.text" />
+      <option name="MAIN_CLASS_NAME" value="org.stonedata.formats.text.TextDecoderTest" />
+      <option name="TEST_OBJECT" value="class" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="JUnit.All in stone" />
+        <item itemvalue="JUnit.TextDecoderTest" />
+        <item itemvalue="JUnit.TestX.test" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="4a1f34b1-d7d2-4294-99e7-85492e654ef7" name="Default Changelist" comment="" />
+      <created>1611453470209</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1611453470209</updated>
+    </task>
+    <servers />
+  </component>
+</project>

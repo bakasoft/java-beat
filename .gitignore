@@ -1,4 +1,6 @@
-/.gradle/
 /build/
+/target/
 
 /.idea/sonarlint/issuestore
+
+.DS_Store
