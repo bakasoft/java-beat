@@ -22,4 +22,12 @@
         </dependency>
     </dependencies>
 
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>GitHub Packages</name>
+            <url>https://maven.pkg.github.com/stone-data/java-stone</url>
+        </repository>
+    </distributionManagement>
+
 </project>
