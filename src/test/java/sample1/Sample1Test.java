@@ -1,7 +1,7 @@
 package sample1;
 
+import org.beat.Beat;
 import org.junit.jupiter.api.Test;
-import org.stonedata.Stone;
 import sample1.types.Button;
 import sample1.types.Label;
 import sample1.types.Panel;
@@ -20,18 +20,18 @@ class Sample1Test {
 
     @Test
     void testSample1() throws IOException {
-        var stone = Stone.builder()
+        var beat = Beat.builder()
                 .withObject(Button.class)
                 .withObject(Label.class)
                 .withObject(Panel.class)
                 .withObject(Text.class)
                 .build();
         var text = TestUtils.loadString("/sample1.st");
-        var result = stone.readText(text);
+        var result = beat.readText(text);
 
         assertTrue(result instanceof Widget, "Result must implement the interface");
 
-        assertSameOutput(stone, result, text);
+        assertSameOutput(beat, result, text);
 
         assertLosslessIO(text);
     }

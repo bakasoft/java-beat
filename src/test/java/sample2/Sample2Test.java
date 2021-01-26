@@ -1,9 +1,9 @@
 package sample2;
 
 import org.junit.jupiter.api.Test;
-import org.stonedata.Stone;
-import org.stonedata.examiners.Examiners;
-import org.stonedata.producers.ValueProducer;
+import org.beat.Beat;
+import org.beat.examiners.Examiners;
+import org.beat.producers.ValueProducer;
 import sample2.types.Document;
 import sample2.types.Point;
 import sample2.types.Rectangle;
@@ -21,7 +21,7 @@ class Sample2Test {
 
     @Test
     void testSample2() throws IOException {
-        var stone = Stone.builder()
+        var beat = Beat.builder()
                 .skipNullFields(true)
                 .withObject(Document.class)
                 .withObject(Rectangle.class)
@@ -36,11 +36,11 @@ class Sample2Test {
                 .build();
 
         var text = TestUtils.loadString("/sample2.st");
-        var result = stone.readText(text);
+        var result = beat.readText(text);
 
         assertTrue(result instanceof Document, "Result must implement the interface");
 
-        assertSameOutput(stone, result, text);
+        assertSameOutput(beat, result, text);
 
         assertLosslessIO(text);
     }

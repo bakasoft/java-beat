@@ -1,6 +1,6 @@
 package util;
 
-import org.stonedata.Stone;
+import org.beat.Beat;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -10,10 +10,10 @@ import java.util.Formatter;
 
 public class TestUtils {
 
-    public static void assertSameOutput(Stone stone, Object result, String text) {
+    public static void assertSameOutput(Beat beat, Object result, String text) {
         var buffer = new StringBuilder();
 
-        stone.writeText(result, buffer, true);
+        beat.writeText(result, buffer, true);
 
         CustomAssertions.assertSameText(text, buffer.toString());
     }

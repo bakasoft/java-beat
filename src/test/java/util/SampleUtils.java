@@ -1,11 +1,11 @@
 package util;
 
-import org.stonedata.formats.text.TextDecoder;
-import org.stonedata.formats.text.TextEncoder;
-import org.stonedata.io.standard.AppendableOutput;
-import org.stonedata.io.standard.SequenceInput;
-import org.stonedata.references.impl.StandardReferenceProvider;
-import org.stonedata.references.impl.StandardReferenceTracker;
+import org.beat.formats.text.TextDecoder;
+import org.beat.formats.text.TextEncoder;
+import org.beat.io.standard.AppendableOutput;
+import org.beat.io.standard.SequenceInput;
+import org.beat.references.impl.StandardReferenceProvider;
+import org.beat.references.impl.StandardReferenceTracker;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

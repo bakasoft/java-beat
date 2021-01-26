@@ -4,8 +4,8 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.stonedata</groupId>
-    <artifactId>stone</artifactId>
+    <groupId>org.bakasoft</groupId>
+    <artifactId>beat</artifactId>
     <version>1.0.0</version>
 
     <properties>
@@ -26,7 +26,7 @@
         <repository>
             <id>github</id>
             <name>GitHub Packages</name>
-            <url>https://maven.pkg.github.com/stone-data/java-stone</url>
+            <url>https://maven.pkg.github.com/bakasoft/java-beat</url>
         </repository>
     </distributionManagement>
 
