@@ -4,6 +4,8 @@ import org.beat.formats.text.TextDecoder;
 import org.beat.io.CharInput;
 import org.beat.io.standard.*;
 import org.beat.formats.text.TextEncoder;
+import org.beat.references.ReferenceProvider;
+import org.beat.references.ReferenceTracker;
 import org.beat.repositories.ExaminerRepository;
 import org.beat.repositories.ProducerRepository;
 
@@ -17,6 +19,8 @@ public class Beat {
 
     private ProducerRepository producerRepository;
     private ExaminerRepository examinerRepository;
+    private ReferenceProvider referenceProvider;
+    private ReferenceTracker referenceTracker;
     private boolean skipNullFields;
     private boolean useCleanDefaultTypes;
 
@@ -105,4 +109,19 @@ public class Beat {
         this.useCleanDefaultTypes = useCleanDefaultTypes;
     }
 
+    public ReferenceTracker getReferenceTracker() {
+        return referenceTracker;
+    }
+
+    public void setReferenceTracker(ReferenceTracker referenceTracker) {
+        this.referenceTracker = referenceTracker;
+    }
+
+    public ReferenceProvider getReferenceProvider() {
+        return referenceProvider;
+    }
+
+    public void setReferenceProvider(ReferenceProvider referenceProvider) {
+        this.referenceProvider = referenceProvider;
+    }
 }

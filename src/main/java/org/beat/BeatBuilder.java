@@ -7,17 +7,24 @@ import org.beat.producers.Producer;
 import org.beat.producers.standard.StandardArrayProducers;
 import org.beat.producers.standard.StandardObjectProducers;
 import org.beat.producers.standard.StandardValueProducers;
+import org.beat.references.ReferenceProvider;
+import org.beat.references.ReferenceTracker;
+import org.beat.references.impl.StandardReferenceProvider;
+import org.beat.references.impl.StandardReferenceTracker;
 import org.beat.repositories.standard.StandardExaminerRepository;
 import org.beat.repositories.standard.StandardProducerRepository;
 import org.beat.util.ReflectUtils;
 
 import java.lang.reflect.Type;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 public class BeatBuilder {
 
     private StandardProducerRepository producers;
     private StandardExaminerRepository examiners;
+    private StandardReferenceProvider referenceProvider;
+    private StandardReferenceTracker referenceTracker;
 
     private boolean skipNullFieldsValue;
     private boolean useCleanDefaultTypesValue;
@@ -131,6 +138,26 @@ public class BeatBuilder {
         return this;
     }
 
+    public BeatBuilder withReference(Object value, String reference) {
+        if (referenceProvider == null) {
+            referenceProvider = new StandardReferenceProvider();
+        }
+        if (referenceTracker == null) {
+            referenceTracker = new StandardReferenceTracker();
+        }
+        referenceProvider.setReference(value, reference);
+        referenceTracker.store(reference, value);
+        return this;
+    }
+
+    public BeatBuilder withReferences(Function<Object, String> generator) {
+        if (referenceProvider == null) {
+            referenceProvider = new StandardReferenceProvider();
+        }
+        referenceProvider.addGenerator(generator);
+        return this;
+    }
+
     private StandardProducerRepository getProducers() {
         if (producers == null) {
             producers = new StandardProducerRepository();
@@ -151,6 +178,8 @@ public class BeatBuilder {
         beat.setProducerRepository(producers);
         beat.setSkipNullFields(skipNullFieldsValue);
         beat.setUseCleanDefaultTypes(useCleanDefaultTypesValue);
+        beat.setReferenceProvider(referenceProvider);
+        beat.setReferenceTracker(referenceTracker);
         return beat;
     }
 
