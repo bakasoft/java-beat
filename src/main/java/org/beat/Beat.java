@@ -25,7 +25,7 @@ public class Beat {
     private boolean useCleanDefaultTypes;
 
     public TextDecoder newTextDecoder() {
-        var decoder = new TextDecoder(producerRepository);
+        var decoder = new TextDecoder(producerRepository, referenceTracker);
 
         decoder.setUseCleanDefaultTypes(useCleanDefaultTypes);
 
@@ -33,7 +33,7 @@ public class Beat {
     }
 
     public TextEncoder newTextEncoder() {
-        var encoder = new TextEncoder(examinerRepository);
+        var encoder = new TextEncoder(examinerRepository, referenceProvider);
 
         encoder.setSkipNullFields(skipNullFields);
 
@@ -62,6 +62,10 @@ public class Beat {
 
     public <T> T readText(Reader reader, Class<T> typeClass) {
         return newTextDecoder().read(new ReaderInput(reader), typeClass);
+    }
+
+    public String writeText(Object value) {
+        return newTextEncoder().write(value);
     }
 
     public void writeText(Object value, Appendable appendable) {

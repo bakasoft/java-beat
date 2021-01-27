@@ -138,7 +138,7 @@ public class BeatBuilder {
         return this;
     }
 
-    public BeatBuilder withReference(Object value, String reference) {
+    public BeatBuilder withValueReference(Object value, String reference) {
         if (referenceProvider == null) {
             referenceProvider = new StandardReferenceProvider();
         }
@@ -150,12 +150,30 @@ public class BeatBuilder {
         return this;
     }
 
-    public BeatBuilder withReferences(Function<Object, String> generator) {
+    public BeatBuilder withReferenceGenerator(Function<Object, String> generator) {
         if (referenceProvider == null) {
             referenceProvider = new StandardReferenceProvider();
         }
         referenceProvider.addGenerator(generator);
         return this;
+    }
+
+    public <T> BeatBuilder withReferenceGenerator(Class<T> typeClass, Function<T, String> generator) {
+        return withReferenceGenerator(obj -> {
+            if (typeClass.isInstance(obj)) {
+                return generator.apply(typeClass.cast(obj));
+            }
+            return null;
+        });
+    }
+
+    public BeatBuilder withHashReference(Class<?> typeClass) {
+        return withReferenceGenerator(obj -> {
+            if (typeClass.isInstance(obj)) {
+                return Integer.toHexString(typeClass.hashCode()) + Integer.toHexString(obj.hashCode());
+            }
+            return null;
+        });
     }
 
     private StandardProducerRepository getProducers() {
